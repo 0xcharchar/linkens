@@ -1,5 +1,7 @@
 <script>
   export let profile = {}
+
+  const count = profile.links.length
 </script>
 
 <div class="container">
@@ -9,10 +11,9 @@
 
   <div>
     <p class="title">
-      <a href={profile.url}>{profile.name}</a>
+      <a href="/user/{profile.userId}">{profile.name}</a>
     </p>
-
-    <p>@{profile.twitter}</p>
+    <p>Has {count} {count > 1 ? 'links' : 'link'}</p>
   </div>
 </div>
 
