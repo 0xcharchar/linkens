@@ -2,6 +2,7 @@
 
 import { readable } from 'svelte/store'
 
+// TODO not likely to have an array in the future, should be a lookup function
 export const temporaryData = readable([
   {
     name: 'Tim',
@@ -55,3 +56,19 @@ export const temporaryData = readable([
     ]
   }
 ])
+
+/***
+ * TODO have a structure with a parser and converter
+ *
+ * 'vnd.name': { parser: val => '', convert: handle => '' }
+ */
+const vendorConversion = {
+  'com.twitter': handle => `https://twitter.com/${handle}`,
+  'com.github': username => `https://github.com/${username}`,
+  'com.youtube.channel': channel => `https://youtube.com/c/${channel}`,
+  'com.youtube.user': username => `https://youtube.com/user/${username}`,
+  'com.instagram': username => `https://instagram.com/${username}`,
+  'com.facebook': username => `https://facebook.com/${username}`, // this works for business pages, haven't tested others
+}
+
+const supportedVendors = Object.keys(vendorConversion)
