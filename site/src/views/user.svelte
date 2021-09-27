@@ -1,9 +1,9 @@
 <script>
   import { temporaryData } from '../stores/ens'
 
-  export let currentRoute
+  export let params = {}
 
-  const { id: userId } = currentRoute.namedParams
+  const { id: userId } = params
   const profile = $temporaryData.find(p => p.name.toLowerCase() === userId.toLowerCase())
   console.log(profile)
 </script>
