@@ -1,4 +1,5 @@
 <script>
+  import { link } from 'svelte-spa-router'
 </script>
 
 <main>
@@ -23,7 +24,7 @@
     <div class="description">
       <h3>For creators</h3>
       <p>It's not hard guys corporate synergy. Moving the goalposts value-added touch base killing it, for going forward. This is not the hill i want to die on 4-blocker what the zeitgeist but high performance keywords or product launch. Get buy-in. Level the playing field fire up your browser, drop-dead date.</p>
-      <button>Let's build!</button>
+      <a href="/wizard" use:link>Let's build!</a>
     </div>
   </section>
 
