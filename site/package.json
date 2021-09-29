@@ -21,7 +21,10 @@
   "dependencies": {
     "@ensdomains/ens-contracts": "^0.0.7",
     "ethers": "^5.4.7",
+    "ipfs": "^0.59.1",
+    "rollup-plugin-polyfill-node": "^0.7.0",
     "sirv-cli": "^1.0.0",
+    "svelte-preprocess": "^4.9.5",
     "svelte-spa-router": "^3.2.0"
   }
 }
