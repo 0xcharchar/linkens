@@ -1,3 +1,6 @@
+import dotenv from 'dotenv'
+dotenv.config()
+
 import svelte from 'rollup-plugin-svelte';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
@@ -5,7 +8,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import json from '@rollup/plugin-json'
-import nodePolyfills from 'rollup-plugin-polyfill-node'
+// import nodePolyfills from 'rollup-plugin-polyfill-node'
 import sveltePreprocess from 'svelte-preprocess'
 
 const production = !process.env.ROLLUP_WATCH;
@@ -42,7 +45,12 @@ export default {
 
 	plugins: [
 		svelte({
-      preprocess: sveltePreprocess({ sourceMap: !production }),
+      preprocess: sveltePreprocess({
+        sourceMap: !production,
+        replace: [
+          ['process.env.DEPLOY_IPFS_ROUTE', JSON.stringify(process.env.DEPLOY_IPFS_ROUTE)]
+        ]
+      }),
 			compilerOptions: {
 				// enable run-time checks when not in production
 				dev: !production
@@ -53,7 +61,7 @@ export default {
 		// a separate file - better for performance
 		css({ output: 'bundle.css' }),
     json(),
-    nodePolyfills(),
+    // nodePolyfills(),
 
 		// If you have external dependencies installed from
 		// npm, you'll most likely need these plugins. In

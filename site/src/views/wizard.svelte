@@ -1,16 +1,15 @@
 <script>
   import { ethers } from 'ethers'
   import { ENSRegistryWithFallback, Resolver } from '@ensdomains/ens-contracts'
-  import * as IPFS from 'ipfs'
 
   import PageForm from '../components/PageForm.svelte'
-  import { page } from '../userpage'
 
   const States = {
     IDLE: 0,
     CHECKING: 1,
     AVAILABLE: 2, 
-    UNAVAILABLE: 3
+    UNAVAILABLE: 3,
+    SAVING: 4,
   }
 
   const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -43,6 +42,8 @@
       signer = provider.getSigner()
     }
 
+    return 'tim.ethonline2021char.eth' // TODO remove
+
     const ownerAddr = await signer.getAddress()
     console.log('owner', ownerAddr)
 
@@ -58,23 +59,56 @@
     return subdomain
   }
 
-  async function storePage (data) {
-    const ipfs = await IPFS.create()
+  async function storePage () {
+    return 'QmUanYrWzHfay6aXochqH8W7sNronSKuDDavByDCsU8wFP' // TODO remove
 
-    const added = await ipfs.create({
-      path: 'index.html',
-      content: data
+    const { hash } = await fetch(process.env.DEPLOY_IPFS_ROUTE, {
+      method: 'POST',
+      body: JSON.stringify({ subdomain })
     })
 
-    return added.cid
+    return hash
+  }
+
+  async function saveProfile (contenthash) {
+    if (!signer) {
+      await provider.send("eth_requestAccounts", [])
+      signer = provider.getSigner()
+    }
+
+    const resolverAddr = await ensRegistry.resolver(ethers.utils.namehash(subdomain))
+    const resolver = new ethers.Contract(resolverAddr, Resolver, signer)
+    console.log(resolver)
+    const node = ethers.utils.namehash(subdomain)
+
+    // set contenthash
+    const hashSet = resolver.functions.setContenthash(node, ethers.utils.toUtf8Bytes(contenthash)).encodeABI()
+    console.log('hashset', hashSet)
+
+    // set all the text fields
+    const textSetters = userProfile.links.map(link => {
+      let key = ''
+      if (link.value.includes('twitter')) key = 'com.twitter'
+      else if (link.value.includes('instagram')) key = 'com.instagram'
+      else if (link.value.includes('facebook')) key = 'com.facebook'
+      else return null
+
+      const urlParts = link.value.split('/')
+      const value = urlParts[urlParts.length - 1]
+
+      return resolver.contract.methods.setText(node, key, value).encodeABI()
+    })
+
+    console.log('setters', { textSetters })
+    return contenthash
   }
 
   function createPage (ev) {
     if (status !== States.AVAILABLE) return
 
     return registerSubdomain(username)
-      .then(userDomain => Promise.resolve(page(userDomain)))
       .then(storePage)
+      .then(saveProfile)
       .then(cid => console.log('cid is', cid))
       .catch(err => console.log('error saving page', err))
   }
