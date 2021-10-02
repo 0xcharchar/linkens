@@ -1,6 +1,7 @@
 <script>
   import { ethers } from 'ethers'
   import { ENSRegistryWithFallback, Resolver } from '@ensdomains/ens-contracts'
+  import contentHash from '@ensdomains/content-hash/dist/index.js'
 
   import PageForm from '../components/PageForm.svelte'
 
@@ -70,20 +71,24 @@
     return hash
   }
 
-  async function saveProfile (contenthash) {
+  async function saveProfile (ipfsHash) {
     if (!signer) {
       await provider.send("eth_requestAccounts", [])
       signer = provider.getSigner()
     }
 
+    const subdomain = 'tim.ethonline2021char.eth'
+
     const resolverAddr = await ensRegistry.resolver(ethers.utils.namehash(subdomain))
     const resolver = new ethers.Contract(resolverAddr, Resolver, signer)
-    console.log(resolver)
+    console.log('resolver', resolver)
     const node = ethers.utils.namehash(subdomain)
 
     // set contenthash
-    const hashSet = resolver.functions.setContenthash(node, ethers.utils.toUtf8Bytes(contenthash)).encodeABI()
-    console.log('hashset', hashSet)
+    const hashSet = resolver.interface.encodeFunctionData(
+      'setContenthash',
+      [node, `0x${contentHash.fromIpfs(ipfsHash)}`]
+    )
 
     // set all the text fields
     const textSetters = userProfile.links.map(link => {
@@ -96,11 +101,15 @@
       const urlParts = link.value.split('/')
       const value = urlParts[urlParts.length - 1]
 
-      return resolver.contract.methods.setText(node, key, value).encodeABI()
+      return resolver.interface.encodeFunctionData('setText', [node, key, value])
     })
 
-    console.log('setters', { textSetters })
-    return contenthash
+    const multiTx = await resolver.multicall([hashSet, ...textSetters])
+    const txResult = await multiTx.wait()
+
+    console.log('txresult', txResult)
+
+    return ipfsHash
   }
 
   function createPage (ev) {
@@ -109,7 +118,6 @@
     return registerSubdomain(username)
       .then(storePage)
       .then(saveProfile)
-      .then(cid => console.log('cid is', cid))
       .catch(err => console.log('error saving page', err))
   }
 </script>
