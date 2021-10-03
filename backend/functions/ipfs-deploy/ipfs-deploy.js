@@ -51,6 +51,8 @@ const handler = async (event) => {
     const pinata = pinataSdk(PINATA_API_KEY, PINATA_API_SECRET)
     const { IpfsHash } = await pinata.pinFileToIPFS(page, pinataOpts)
 
+    console.log('the hash', IpfsHash)
+
     return {
       statusCode: 200,
       body: JSON.stringify({ hash: IpfsHash }),

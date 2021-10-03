@@ -118,3 +118,9 @@
     <button on:click={createPage}>Create page</button>
   {/if}
 </main>
+
+<style>
+  main {
+    padding: 1rem;
+  }
+</style>

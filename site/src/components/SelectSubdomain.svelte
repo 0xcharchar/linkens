@@ -6,6 +6,8 @@
   import { ENSRegistryWithFallback } from '@ensdomains/ens-contracts'
   import { createEventDispatcher } from 'svelte'
 
+  const dispatch = createEventDispatcher()
+
   const States = {
     IDLE: 0,
     CHECKING: 1,
@@ -72,26 +74,47 @@
 
   function checkOrContinue (ev) {
     if (status === States.AVAILABLE) {
-      // TODO Fire event when user continues
+      dispatch('step', { complete: true, username: chosenUsername })
     } else {
       checkLabel()
     }
   }
 </script>
 
-<slot>
-  <h2>Choose your username</h2>
-</slot>
+<section>
+  <slot>
+    <h2>Choose your username</h2>
+  </slot>
 
-<!-- TODO when inactive, use plain text because of svelte limitation -->
-<div>
-  <div id="username-box" contenteditable on:blur={neverEmpty} on:focus={selectAll} bind:innerHTML={chosenUsername}></div>.{env.ENS_NODE}
-</div>
+  <!-- TODO when inactive, use plain text because of svelte limitation -->
+  <div id="username">
+    <div id="username-editor" contenteditable on:blur={neverEmpty} on:focus={selectAll} bind:innerHTML={chosenUsername}></div>.{env.ENS_NODE}
+  </div>
 
-<button disabled={chosenUsername === usernamePlaceholder} on:click|preventDefault={checkOrContinue}>{status === States.AVAILABLE ? 'Continue' : 'Check'}</button>
+  <button disabled={chosenUsername === usernamePlaceholder} on:click|preventDefault={checkOrContinue}>{status === States.AVAILABLE ? 'Continue' : 'Check'}</button>
+</section>
 
 <style>
-  #username-box {
+  section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  h2 {
+    margin: 0;
+  }
+
+  #username-editor {
     display: inline;
+    border-bottom: 3px solid #333;
+    padding-bottom: 0.1rem;
+    font-weight: bold;
+  }
+
+  #username-editor:focus {
+    font-weight: normal;
   }
 </style>
