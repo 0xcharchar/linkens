@@ -4,6 +4,7 @@
   import contentHash from '@ensdomains/content-hash/dist/index.js'
 
   import PageForm from '../components/PageForm.svelte'
+  import SelectSubdomain from '../components/SelectSubdomain.svelte'
 
   const States = {
     IDLE: 0,
@@ -13,76 +14,64 @@
     SAVING: 4,
   }
 
+  const env = {
+    ENS_REGISTRY_ADDRESS: process.env.ENS_REGISTRY_ADDRESS,
+    ENS_NODE: process.env.ENS_NODE,
+    RESOLVER_ADDRESS: process.env.RESOLVER_ADDRESS,
+    DEPLOY_IPFS_ROUTE: process.env.DEPLOY_IPFS_ROUTE,
+  }
+
   const provider = new ethers.providers.Web3Provider(window.ethereum)
   let signer = null
-  const ensRegistry = new ethers.Contract('0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', ENSRegistryWithFallback, provider)
+  const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, provider)
 
   let username = ''
   let userProfile
   let status = States.IDLE
 
-  $: subdomain = `${username}.ethonline2021char.eth` // TODO env var for domain during build pls
-
-  // check the ENS registry to see if a subdomain is registered
-  function checkLabel (ev) {
-    status = States.CHECKING
-
-    return ensRegistry.recordExists(ethers.utils.namehash(subdomain))
-      .then(recordExists => {
-        status = !recordExists ? States.AVAILABLE : States.UNAVAILABLE
-      })
-      .catch(err => {
-        status = States.UNAVAILABLE
-      })
-  }
+  const subdomain = label => `${label}.${env.ENS_NODE}`
+  const hasher = node => ethers.utils.namehash(node)
 
   async function registerSubdomain (label) {
     // TODO call sitemanager contract one day
     if (!signer) {
+      // TODO should be in a store
       await provider.send("eth_requestAccounts", [])
       signer = provider.getSigner()
     }
 
-    return 'tim.ethonline2021char.eth' // TODO remove
-
     const ownerAddr = await signer.getAddress()
-    console.log('owner', ownerAddr)
 
     const subTx = await ensRegistry.connect(signer).setSubnodeRecord(
-      ethers.utils.namehash('ethonline2021char.eth'),
+      hasher(env.ENS_NODE),
       ethers.utils.id(label),
       ownerAddr,
-      '0x42D63ae25990889E35F215bC95884039Ba354115',
+      env.RESOLVER_ADDRESS,
       0
     )
     await subTx.wait()
 
-    return subdomain
+    return label
   }
 
-  async function storePage () {
-    return 'QmUanYrWzHfay6aXochqH8W7sNronSKuDDavByDCsU8wFP' // TODO remove
-
-    const { hash } = await fetch(process.env.DEPLOY_IPFS_ROUTE, {
+  async function deployPage (label) {
+    const { hash } = await fetch(env.DEPLOY_IPFS_ROUTE, {
       method: 'POST',
-      body: JSON.stringify({ subdomain })
+      body: JSON.stringify({ subdomain: subdomain(label) })
     })
 
-    return hash
+    return { ipfsHash: hash, label }
   }
 
-  async function saveProfile (ipfsHash) {
+  async function saveProfile ({ ipfsHash, label }) {
     if (!signer) {
       await provider.send("eth_requestAccounts", [])
       signer = provider.getSigner()
     }
 
-    const subdomain = 'tim.ethonline2021char.eth'
-
-    const resolverAddr = await ensRegistry.resolver(ethers.utils.namehash(subdomain))
+    const node = hasher(subdomain(label))
+    const resolverAddr = await ensRegistry.resolver(node)
     const resolver = new ethers.Contract(resolverAddr, Resolver, signer)
-    console.log('resolver', resolver)
-    const node = ethers.utils.namehash(subdomain)
 
     // set contenthash
     const hashSet = resolver.interface.encodeFunctionData(
@@ -116,16 +105,14 @@
     if (status !== States.AVAILABLE) return
 
     return registerSubdomain(username)
-      .then(storePage)
+      .then(deployPage)
       .then(saveProfile)
       .catch(err => console.log('error saving page', err))
   }
 </script>
 
 <main>
-  <p>Choose username</p>
-  <input type="text" bind:value={username} />
-  <button on:click={checkLabel}>Check</button>
+  <SelectSubdomain {provider} />
   {#if status === States.AVAILABLE}
     <PageForm bind:profile={userProfile} />
     <button on:click={createPage}>Create page</button>

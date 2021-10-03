@@ -48,7 +48,10 @@ export default {
       preprocess: sveltePreprocess({
         sourceMap: !production,
         replace: [
-          ['process.env.DEPLOY_IPFS_ROUTE', JSON.stringify(process.env.DEPLOY_IPFS_ROUTE)]
+          ['process.env.DEPLOY_IPFS_ROUTE', JSON.stringify(process.env.DEPLOY_IPFS_ROUTE)],
+          ['process.env.RESOLVER_ADDRESS', JSON.stringify(process.env.RESOLVER_ADDRESS)],
+          ['process.env.ENS_REGISTRY_ADDRESS', JSON.stringify(process.env.ENS_REGISTRY_ADDRESS)],
+          ['process.env.ENS_NODE', JSON.stringify(process.env.ENS_NODE)],
         ]
       }),
 			compilerOptions: {
