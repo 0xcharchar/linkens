@@ -10,6 +10,7 @@
   registerStep(step)
 </script>
 
+<!-- TODO need to validate that a step is complete -->
 {#if $currentStep === step}
-  <slot></slot>
+  <slot slotStep={step}></slot>
 {/if}

@@ -7,14 +7,6 @@
   import SelectSubdomain from '../components/SelectSubdomain.svelte'
   import { Steps, Step } from '../components/steps'
 
-  const States = {
-    IDLE: 0,
-    CHECKING: 1,
-    AVAILABLE: 2, 
-    UNAVAILABLE: 3,
-    SAVING: 4,
-  }
-
   const env = {
     ENS_REGISTRY_ADDRESS: process.env.ENS_REGISTRY_ADDRESS,
     ENS_NODE: process.env.ENS_NODE,
@@ -27,8 +19,9 @@
   const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, provider)
 
   let username = ''
-  let userProfile
-  let status = States.IDLE
+  let links
+
+  $: userProfile = { username, links }
 
   const subdomain = label => `${label}.${env.ENS_NODE}`
   const hasher = node => ethers.utils.namehash(node)
@@ -56,10 +49,12 @@
   }
 
   async function deployPage (label) {
-    const { hash } = await fetch(env.DEPLOY_IPFS_ROUTE, {
+    const response  = await fetch(env.DEPLOY_IPFS_ROUTE, {
       method: 'POST',
       body: JSON.stringify({ subdomain: subdomain(label) })
     })
+
+    const { hash } = await response.json()
 
     return { ipfsHash: hash, label }
   }
@@ -69,6 +64,9 @@
       await provider.send("eth_requestAccounts", [])
       signer = provider.getSigner()
     }
+
+    console.log('ipfshash', ipfsHash)
+    console.log('hashed', contentHash.fromIpfs(ipfsHash))
 
     const node = hasher(subdomain(label))
     const resolverAddr = await ensRegistry.resolver(node)
@@ -83,16 +81,13 @@
     // set all the text fields
     const textSetters = userProfile.links.map(link => {
       let key = ''
-      if (link.value.includes('twitter')) key = 'com.twitter'
-      else if (link.value.includes('instagram')) key = 'com.instagram'
-      else if (link.value.includes('facebook')) key = 'com.facebook'
+      if (link.description.toLowerCase().includes('twitter')) key = 'com.twitter'
+      else if (link.description.toLowerCase().includes('instagram')) key = 'com.instagram'
+      else if (link.description.toLowerCase().includes('facebook')) key = 'com.facebook'
       else return null
 
-      const urlParts = link.value.split('/')
-      const value = urlParts[urlParts.length - 1]
-
-      return resolver.interface.encodeFunctionData('setText', [node, key, value])
-    })
+      return resolver.interface.encodeFunctionData('setText', [node, key, link.value])
+    }).filter(link => link !== null)
 
     const multiTx = await resolver.multicall([hashSet, ...textSetters])
     const txResult = await multiTx.wait()
@@ -102,28 +97,36 @@
     return ipfsHash
   }
 
-  function createPage (ev) {
-    if (status !== States.AVAILABLE) return
-
-    return registerSubdomain(username)
-      .then(deployPage)
-      .then(saveProfile)
-      .catch(err => console.log('error saving page', err))
+  function createPage (profile) {
+    return function (ev) {
+      return registerSubdomain(username)
+        .then(deployPage)
+        .then(saveProfile)
+        .catch(err => console.log('error saving page', err))
+    }
   }
 </script>
 
 <main>
   <Steps>
-    <Step title="Select username">
-      <SelectSubdomain {provider} />
+    <Step title="Select username" let:slotStep>
+      <SelectSubdomain bind:username={username} {provider} />
     </Step>
 
     <Step title="Fill in social">
-      <PageForm bind:profile={userProfile} />
+      <PageForm bind:profile={links} />
     </Step>
 
     <Step title="Confirmation">
-      <p>yay</p>
+      <div>
+        <h2>{userProfile.username}</h2>
+        <ul>
+          {#each userProfile.links as link}
+            <li>{link.description}: {link.value}</li>
+          {/each}
+        </ul>
+        <button on:click={createPage(userProfile)}>Save</button>
+      </div>
     </Step>
   </Steps>
 </main>

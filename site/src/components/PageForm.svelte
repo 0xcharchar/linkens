@@ -1,17 +1,15 @@
 <script>
-  export let profile = {
-    links: [
-      { description: 'Instagram', value: 'https://instagram.com/' },
-      { description: 'Twitter', value: 'https://twitter.com/@' },
-      { description: 'Facebook', value: 'https://facebook.com/' },
-    ]
-  }
+  export let profile = [
+    { description: 'Instagram', value: '' },
+    { description: 'Twitter', value: '' },
+    { description: 'Facebook', value: '' },
+  ]
 </script>
 
 <ul>
-  {#each profile.links as field}
+  {#each profile as field}
     <li>
-      <input type="text" bind:value={field.description} />: <input type="text" bind:value={field.value} />
+      <label>{field.description}: <input type="text" bind:value={field.value} /></label>
     </li>
   {/each}
 </ul>

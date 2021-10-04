@@ -1,6 +1,7 @@
 <script>
   export let provider = null
   export let active = true
+  export let username = ''
 
   import { ethers } from 'ethers'
   import { ENSRegistryWithFallback } from '@ensdomains/ens-contracts'
@@ -35,6 +36,7 @@
     return ensRegistry.recordExists(ethers.utils.namehash(`${chosenUsername}.${env.ENS_NODE}`))
       .then(recordExists => {
         status = !recordExists ? States.AVAILABLE : States.UNAVAILABLE
+        username = chosenUsername
       })
       .catch(err => {
         status = States.UNAVAILABLE
@@ -71,14 +73,6 @@
       status = previous.status
     }
   }
-
-  function checkOrContinue (ev) {
-    if (status === States.AVAILABLE) {
-      dispatch('step', { complete: true, username: chosenUsername })
-    } else {
-      checkLabel()
-    }
-  }
 </script>
 
 <section>
@@ -91,7 +85,9 @@
     <div id="username-editor" contenteditable on:blur={neverEmpty} on:focus={selectAll} bind:innerHTML={chosenUsername}></div>.{env.ENS_NODE}
   </div>
 
-  <button disabled={chosenUsername === usernamePlaceholder} on:click|preventDefault={checkOrContinue}>{status === States.AVAILABLE ? 'Continue' : 'Check'}</button>
+  <p>{status}</p>
+
+  <button on:click={checkLabel}>Check</button>
 </section>
 
 <style>
