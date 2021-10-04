@@ -5,6 +5,7 @@
 
   import PageForm from '../components/PageForm.svelte'
   import SelectSubdomain from '../components/SelectSubdomain.svelte'
+  import { Steps, Step } from '../components/steps'
 
   const States = {
     IDLE: 0,
@@ -112,11 +113,19 @@
 </script>
 
 <main>
-  <SelectSubdomain {provider} />
-  {#if status === States.AVAILABLE}
-    <PageForm bind:profile={userProfile} />
-    <button on:click={createPage}>Create page</button>
-  {/if}
+  <Steps>
+    <Step title="Select username">
+      <SelectSubdomain {provider} />
+    </Step>
+
+    <Step title="Fill in social">
+      <PageForm bind:profile={userProfile} />
+    </Step>
+
+    <Step title="Confirmation">
+      <p>yay</p>
+    </Step>
+  </Steps>
 </main>
 
 <style>
