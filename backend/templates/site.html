@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <title>{{ SUBDOMAIN }}</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+  </head>
+  <body>
+    <h1>{{ SUBDOMAIN }}'s page</h1>
+    <p id="loading">Loading</p>
+    <ul id="profile-links">
+    </ul>
+
+    <script>
+      const ENS_SUBDOMAIN = 'tim.ethonline2021char.eth' // TODO change
+      const node = ethers.utils.namehash(ENS_SUBDOMAIN)
+
+      const provider = new ethers.providers.AlchemyProvider('ropsten', '{{ ALCHEMY_API_KEY }}') // TODO replace
+
+      // TODO reverse look up subdomain, get resolver
+      const resolverAbi = new ethers.utils.Interface([
+        'function text(bytes32 node, string calldata key) external view returns (string memory)'
+      ])
+      console.log('abi', resolverAbi)
+      const resolver = new ethers.Contract('0x42D63ae25990889E35F215bC95884039Ba354115', resolverAbi, provider)
+      console.log('resolvercontract', resolver)
+
+      const textTranslate = {
+        'com.instagram': h => `https://instagram.com/${h}`,
+        'com.twitter': h => `https://twitter.com/${h.startsWith('@') ? h : '@'+h}`,
+        'com.facebook': h => `https://facebook.com/${h}`,
+      }
+
+      const textRequests = ['com.twitter', 'com.facebook', 'com.instagram'].map(async k => {
+        return { type: k, value: await resolver.text(node, k) }
+      })
+      console.log('requests', textRequests)
+
+      const profileLinks = document.getElementById('profile-links')
+      console.log('profileLinks', profileLinks)
+      Promise.all(textRequests)
+        .then(results => results.map(({ type, value }) => {
+          const url = textTranslate[type](value)
+          const listItem = document.createElement('li')
+          const anchor = document.createElement('a')
+          const linkText = document.createTextNode(url)
+
+          anchor.appendChild(linkText)
+          listItem.appendChild(anchor)
+
+          return listItem
+        }))
+        .then(listItems => {
+          console.log(listItems)
+          listItems.forEach(item => {
+            profileLinks.appendChild(item)
+          })
+        })
+        .then(() => {
+          const loadingEl = document.getElementById('loading')
+          loadingEl.style.display = 'none'
+        })
+        .catch(err => console.log('the error', err))
+    </script>
+  </body>
+</html>
