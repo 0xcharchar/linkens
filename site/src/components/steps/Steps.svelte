@@ -39,13 +39,61 @@
 
 <div class="tabs">
   <ul>
-    {#each steps as step}
-      <li>{step.title}</li>
+    {#each steps as step, idx}
+      <li class:active={$currentStep === step}>
+        <p class='step-num'>{idx + 1}</p>
+        <p class='step-text'>{step.title}</p>
+      </li>
     {/each}
   </ul>
 
   <slot></slot>
 
-  <button disabled={steps.indexOf($currentStep) === 0} on:click={previousStep($currentStep)}>Previous</button>
-  <button disabled={steps.indexOf($currentStep) === steps.length - 1} on:click={nextStep($currentStep)}>Next</button>
+  <section id="control-buttons">
+    <button disabled={steps.indexOf($currentStep) === 0} on:click={previousStep($currentStep)}>Previous</button>
+    <button disabled={steps.indexOf($currentStep) === steps.length - 1} on:click={nextStep($currentStep)}>Next</button>
+  </section>
 </div>
+
+<style>
+  ul {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    text-align: center;
+    padding: 0.5em;
+    min-width: 20%;
+    height: 15vh;
+    background: #dedede;
+  }
+
+  .step-text {
+    display: none;
+  }
+
+  .active {
+    flex-grow: 3;
+    background: #666;
+    color: #ffffff;
+  }
+
+  .active .step-text {
+    display: block;
+  }
+
+  #control-buttons {
+    display: flex;
+    justify-content: space-around;
+    padding: 1em;
+  }
+
+  #control-buttons button {
+    min-width: 15ch;
+  }
+</style>

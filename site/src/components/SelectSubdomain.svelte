@@ -22,12 +22,14 @@
   }
   let status = States.IDLE
   const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, provider)
-  const usernamePlaceholder = 'your-username'
+  const usernamePlaceholder = 'click-here'
   let chosenUsername = usernamePlaceholder
   let previous = {
     status: States.IDLE,
     username: ''
   }
+
+  $: statusText = Object.keys(States)[status].toLowerCase()
 
   // check the ENS registry to see if a subdomain is registered
   function checkLabel () {
@@ -85,9 +87,9 @@
     <div id="username-editor" contenteditable on:blur={neverEmpty} on:focus={selectAll} bind:innerHTML={chosenUsername}></div>.{env.ENS_NODE}
   </div>
 
-  <p>{status}</p>
-
   <button on:click={checkLabel}>Check</button>
+
+  <p class:hidden={status === States.IDLE} style="text-transform: capitalize;">{statusText}</p>
 </section>
 
 <style>
@@ -97,10 +99,15 @@
     justify-content: space-around;
     align-items: center;
     gap: 2rem;
+    margin: 1em;
   }
 
   h2 {
     margin: 0;
+  }
+
+  .hidden {
+    visibility: hidden;
   }
 
   #username-editor {

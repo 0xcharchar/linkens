@@ -103,7 +103,6 @@
 
   function createPage (profile) {
     return function (ev) {
-      // return registerSubdomain(username)
       return deployPage(username)
         .then(saveProfile)
         .catch(err => console.log('error saving page', err))
@@ -122,21 +121,37 @@
     </Step>
 
     <Step title="Confirmation">
-      <div>
-        <h2>{userProfile.username}</h2>
+      <section id="confirmation">
+        <h2>Confirmation</h2>
+        <p>Below are the values we will use to create your LinkENS site and store in ENS</p>
         <ul>
+          <li><em>{userProfile.username}</em>.ethonline2021char.eth</li>
           {#each userProfile.links as link}
-            <li>{link.description}: {link.value}</li>
+            <li><em>{link.description}</em>: {link.value}</li>
           {/each}
         </ul>
         <button on:click={createPage(userProfile)}>Save</button>
-      </div>
+      </section>
     </Step>
   </Steps>
 </main>
 
 <style>
   main {
-    padding: 1rem;
+    padding: 0;
+  }
+
+  #confirmation {
+    padding: 1em;
+  }
+
+  #confirmation em {
+    font-weight: bold;
+    font-style: normal;
+  }
+
+  #confirmation button {
+    display: block;
+    margin: 0 auto;
   }
 </style>
