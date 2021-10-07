@@ -14,6 +14,8 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
+const { WALLET_PK_ROPSTEN, ALCHEMY_API_KEY } = process.env
+
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -24,5 +26,11 @@ module.exports = {
     tests: './test',
     cache: './cache',
     artifacts: './artifacts'
+  },
+  networks: {
+    ropsten: {
+      url: `https://eth-ropsten.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
+      accounts: [`0x${WALLET_PK_ROPSTEN}`]
+    }
   }
 };

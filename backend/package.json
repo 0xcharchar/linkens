@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@pinata/sdk": "^1.1.23"
+    "@pinata/sdk": "^1.1.23",
+    "web3.storage": "^3.3.2"
   }
 }

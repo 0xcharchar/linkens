@@ -12,6 +12,7 @@
     ENS_NODE: process.env.ENS_NODE,
     RESOLVER_ADDRESS: process.env.RESOLVER_ADDRESS,
     DEPLOY_IPFS_ROUTE: process.env.DEPLOY_IPFS_ROUTE,
+    SITE_MANAGER_ADDRESS: process.env.SITE_MANAGER_ADDRESS,
   }
 
   const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -36,8 +37,7 @@
 
     const ownerAddr = await signer.getAddress()
 
-    const subTx = await ensRegistry.connect(signer).setSubnodeRecord(
-      hasher(env.ENS_NODE),
+    const subTx = await ensRegistry.connect(signer).subdomainRegister(
       ethers.utils.id(label),
       ownerAddr,
       env.RESOLVER_ADDRESS,
@@ -89,7 +89,11 @@
       return resolver.interface.encodeFunctionData('setText', [node, key, link.value])
     }).filter(link => link !== null)
 
-    const multiTx = await resolver.multicall([hashSet, ...textSetters])
+    const siteManager = new ethers.Contract(env.SITE_MANAGER_ADDRESS, ['function subdomainRegister(bytes32 label, bytes[] calldata data) external returns (bytes[] memory)'], signer)
+
+    console.log('multicalldata', [hashSet, ...textSetters])
+    console.log('label', label, ethers.utils.id(label))
+    const multiTx = await siteManager.subdomainRegister(ethers.utils.id(label), [hashSet, ...textSetters], { gasLimit: 500000 })
     const txResult = await multiTx.wait()
 
     console.log('txresult', txResult)
@@ -99,8 +103,8 @@
 
   function createPage (profile) {
     return function (ev) {
-      return registerSubdomain(username)
-        .then(deployPage)
+      // return registerSubdomain(username)
+      return deployPage(username)
         .then(saveProfile)
         .catch(err => console.log('error saving page', err))
     }

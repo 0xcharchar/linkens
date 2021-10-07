@@ -52,6 +52,7 @@ export default {
           ['process.env.RESOLVER_ADDRESS', JSON.stringify(process.env.RESOLVER_ADDRESS)],
           ['process.env.ENS_REGISTRY_ADDRESS', JSON.stringify(process.env.ENS_REGISTRY_ADDRESS)],
           ['process.env.ENS_NODE', JSON.stringify(process.env.ENS_NODE)],
+          ['process.env.SITE_MANAGER_ADDRESS', JSON.stringify(process.env.SITE_MANAGER_ADDRESS)],
         ]
       }),
 			compilerOptions: {
