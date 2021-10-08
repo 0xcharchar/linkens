@@ -6,8 +6,8 @@
     ENS_REGISTRY_ADDRESS: process.env.ENS_REGISTRY_ADDRESS,
     ENS_NODE: process.env.ENS_NODE,
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
-    // USER_SUBDOMAIN: '{{ SUBDOMAIN }}',
-    USER_SUBDOMAIN: 'mmmonster.ethonline2021char.eth',
+    USER_SUBDOMAIN: '{{ SUBDOMAIN }}',
+    //USER_SUBDOMAIN: 'mmmonster.ethonline2021char.eth',
   }
 
   const toGateway = cid => `https://gateway.pinata.cloud/ipfs/${cid}`
