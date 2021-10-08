@@ -144,62 +144,62 @@
       async function loadProfile () {
         const socialsRequests = ['com.twitter', 'com.facebook', 'com.instagram'].map(async k => {
           return { type: k, value: await resolver.text(node, k) }
-        })
+        });
 
-        const links = await Promise.all(socialsRequests)
-        const avatar = await resolver.text(node, 'avatar')
+        const links = await Promise.all(socialsRequests);
+        const avatar = await resolver.text(node, 'avatar');
 
         return {
           name: ENS_SUBDOMAIN.split('.')[0],
           avatar: avatar ? toGateway(avatar) : '',
           links
-        }
+        };
       }
 
       function buildBanner (profile) {
         if (profile.avatar) {
-          const img = document.createElement('img')
-          img.src = profile.avatar
+          const img = document.createElement('img');
+          img.src = profile.avatar;
 
-          const avatarContainer = document.getElementById('avatar')
-          avatarContainer.appendChild(img)
+          const avatarContainer = document.getElementById('avatar');
+          avatarContainer.appendChild(img);
         }
 
-        const heading = document.createElement('h1')
-        heading.appendChild(document.createTextNode(profile.name))
+        const heading = document.createElement('h1');
+        heading.appendChild(document.createTextNode(profile.name));
 
-        const banner = document.getElementById('banner')
-        banner.appendChild(heading)
+        const banner = document.getElementById('banner');
+        banner.appendChild(heading);
       }
 
       function buildLinks (links) {
         const listEl = links.map(({ type, value }) => {
-          const listItem = document.createElement('li')
-          const anchor = document.createElement('a')
-          anchor.href = textTranslate[type].handler(value)
-          const linkText = document.createTextNode(`${value} on ${textTranslate[type].pretty}`)
+          const listItem = document.createElement('li');
+          const anchor = document.createElement('a');
+          anchor.href = textTranslate[type].handler(value);
+          const linkText = document.createTextNode(`${value} on ${textTranslate[type].pretty}`);
 
-          anchor.appendChild(linkText)
-          listItem.appendChild(anchor)
+          anchor.appendChild(linkText);
+          listItem.appendChild(anchor);
 
-          return listItem
+          return listItem;
         })
 
-        const profileLinks = document.getElementById('profile-links')
-        listEl.forEach(item => profileLinks.appendChild(item))
+        const profileLinks = document.getElementById('profile-links');
+        listEl.forEach(item => profileLinks.appendChild(item));
       }
 
       loadProfile()
         .then(profile => {
-          buildBanner(profile)
-          buildLinks(profile.links)
+          buildBanner(profile);
+          buildLinks(profile.links);
         })
         .then(() => {
-          const loadingEl = document.getElementById('loading')
-          loadingEl.style.display = 'none'
+          const loadingEl = document.getElementById('loading');
+          loadingEl.style.display = 'none';
 
-          const content = document.getElementById('content')
-          content.style.display = 'block'
+          const content = document.getElementById('content');
+          content.style.display = 'block';
         })
         .catch(err => console.log('the error', err));
     </script>
