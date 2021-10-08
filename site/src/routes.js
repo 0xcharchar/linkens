@@ -8,7 +8,7 @@ import Wizard from './views/wizard.svelte'
 const routes = {
   '/': Landing,
   '/supporters': Search,
-  '/user/:id': User,
+  '/user': User,
   '/wizard': Wizard,
 }
 

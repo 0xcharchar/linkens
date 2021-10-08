@@ -27,27 +27,6 @@
   const subdomain = label => `${label}.${env.ENS_NODE}`
   const hasher = node => ethers.utils.namehash(node)
 
-  async function registerSubdomain (label) {
-    // TODO call sitemanager contract one day
-    if (!signer) {
-      // TODO should be in a store
-      await provider.send("eth_requestAccounts", [])
-      signer = provider.getSigner()
-    }
-
-    const ownerAddr = await signer.getAddress()
-
-    const subTx = await ensRegistry.connect(signer).subdomainRegister(
-      ethers.utils.id(label),
-      ownerAddr,
-      env.RESOLVER_ADDRESS,
-      0
-    )
-    await subTx.wait()
-
-    return label
-  }
-
   async function deployPage (label) {
     const response  = await fetch(env.DEPLOY_IPFS_ROUTE, {
       method: 'POST',
