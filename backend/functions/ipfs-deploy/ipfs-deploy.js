@@ -1,7 +1,6 @@
 'use strict'
 
 const { Readable } = require('stream')
-const fs = require('fs/promises')
 const pinataSdk = require('@pinata/sdk')
 
 const { ALCHEMY_API_KEY, PINATA_API_KEY, PINATA_API_SECRET } = process.env
