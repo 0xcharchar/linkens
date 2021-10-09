@@ -95,6 +95,16 @@
         border: 3px solid #464646;
         color: #464646;
       }
+
+      #error-msg {
+        display: none;
+        color: #ffffff;
+        background: #ff5656;
+        border: 3px solid #f42c2c;
+        padding: 2em;
+        text-align: center;
+        font-size: 1.5em;
+      }
     </style>
   </head>
   <body>
@@ -112,17 +122,21 @@
       </section>
     </div>
 
+    <div id="error-msg">
+      <p>Unable to find this subdomain</p>
+    </div>
+
     <script>
       const ENS_SUBDOMAIN = '{{ SUBDOMAIN }}';
       const node = ethers.utils.namehash(ENS_SUBDOMAIN);
 
       const provider = new ethers.providers.AlchemyProvider('ropsten', '{{ ALCHEMY_API_KEY }}');
 
-      /* TODO reverse look up subdomain, get resolver */
-      const resolverAbi = new ethers.utils.Interface([
-        'function text(bytes32 node, string calldata key) external view returns (string memory)',
+      const registryAbi = new ethers.utils.Interface([
+        'function recordExists(bytes32 node) external virtual view returns (bool)',
+        'function resolver(bytes32 node) external virtual view returns (address)',
       ]);
-      const resolver = new ethers.Contract('0x42D63ae25990889E35F215bC95884039Ba354115', resolverAbi, provider);
+      const registry = new ethers.Contract('0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', registryAbi, provider);
 
       const textTranslate = {
         'com.instagram': {
@@ -142,6 +156,18 @@
       const toGateway = cid => `https://gateway.pinata.cloud/ipfs/${cid}`;
 
       async function loadProfile () {
+        const resolverAddr = await registry.resolver(node);
+        const resolverAbi = new ethers.utils.Interface([
+          'function text(bytes32 node, string calldata key) external view returns (string memory)',
+        ]);
+        const resolver = new ethers.Contract(resolverAddr, resolverAbi, provider);
+
+        // check if things exist
+        const subdomainExists = await registry.recordExists(node);
+        if (!subdomainExists) {
+          throw new Error('Subdomain does not exist');
+        }
+
         const socialsRequests = ['com.twitter', 'com.facebook', 'com.instagram'].map(async k => {
           return { type: k, value: await resolver.text(node, k) }
         });
@@ -189,19 +215,26 @@
         listEl.forEach(item => profileLinks.appendChild(item));
       }
 
+      const loadingEl = document.getElementById('loading');
+      const contentEl = document.getElementById('content');
+
       loadProfile()
         .then(profile => {
           buildBanner(profile);
           buildLinks(profile.links);
         })
         .then(() => {
-          const loadingEl = document.getElementById('loading');
           loadingEl.style.display = 'none';
-
-          const content = document.getElementById('content');
-          content.style.display = 'block';
+          contentEl.style.display = 'block';
         })
-        .catch(err => console.log('the error', err));
+        .catch(err => {
+          loadingEl.style.display = 'none';
+          contentEl.style.display = 'none';
+
+          const errorEl = document.getElementById('error-msg');
+          errorEl.style.display = 'block';
+          console.log('the error', err);
+        });
     </script>
   </body>
 </html>
