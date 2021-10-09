@@ -8,6 +8,7 @@
   let signer = null
   let creatingProfile = ''
 
+  console.log('userprofile', profile)
   const env = {
     ENS_REGISTRY_ADDRESS: process.env.ENS_REGISTRY_ADDRESS,
     ENS_NODE: process.env.ENS_NODE,
@@ -62,11 +63,19 @@
       return resolver.interface.encodeFunctionData('setText', [node, key, link.value])
     }).filter(link => link !== null)
 
+    let avatarSet = null
+    if (profile.avatarCid) {
+      console.log('there is an avatar')
+      avatarSet = resolver.interface.encodeFunctionData('setText', [node, 'avatar', profile.avatarCid])
+    }
+
     const siteManager = new ethers.Contract(env.SITE_MANAGER_ADDRESS, ['function subdomainRegister(bytes32 label, bytes[] calldata data) external returns (bytes[] memory)'], signer)
 
-    console.log('multicalldata', [hashSet, ...textSetters])
+    const encodedFunctions = [hashSet, ...textSetters, avatarSet].filter(f => f)
+
+    console.log('multicalldata', encodedFunctions)
     console.log('label', label, ethers.utils.id(label))
-    const multiTx = await siteManager.subdomainRegister(ethers.utils.id(label), [hashSet, ...textSetters], { gasLimit: 500000 })
+    const multiTx = await siteManager.subdomainRegister(ethers.utils.id(label), encodedFunctions, { gasLimit: 500000 })
     const txResult = await multiTx.wait()
 
     console.log('txresult', txResult)

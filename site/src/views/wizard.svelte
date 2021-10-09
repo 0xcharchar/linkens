@@ -15,8 +15,9 @@
 
   let username = ''
   let links
+  let avatarCid = ''
 
-  $: userProfile = { username, links }
+  $: userProfile = { username, links, avatarCid }
 </script>
 
 <main>
@@ -26,7 +27,7 @@
     </Step>
 
     <Step title="Fill in social">
-      <PageForm bind:profile={links} />
+      <PageForm bind:avatarCid={avatarCid} bind:profile={links} />
     </Step>
 
     <Step title="Confirmation">
