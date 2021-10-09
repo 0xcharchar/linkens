@@ -34,11 +34,12 @@
   // check the ENS registry to see if a subdomain is registered
   function checkLabel () {
     status = States.CHECKING
+    console.log('chosenusername', chosenUsername)
 
     return ensRegistry.recordExists(ethers.utils.namehash(`${chosenUsername}.${env.ENS_NODE}`))
       .then(recordExists => {
         status = !recordExists ? States.AVAILABLE : States.UNAVAILABLE
-        username = chosenUsername
+        username = chosenUsername.toLowerCase()
       })
       .catch(err => {
         status = States.UNAVAILABLE
