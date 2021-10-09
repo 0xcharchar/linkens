@@ -47,7 +47,9 @@
     {/each}
   </ul>
 
-  <slot></slot>
+  <div class="container">
+    <slot></slot>
+  </div>
 
   <section id="control-buttons">
     <button disabled={steps.indexOf($currentStep) === 0} on:click={previousStep($currentStep)}>Previous</button>
@@ -95,5 +97,12 @@
 
   #control-buttons button {
     min-width: 15ch;
+  }
+
+  @media (min-width:801px) { /* tablet, landscape iPad, lo-res laptops ands desktops */
+    .container, #control-buttons {
+      margin: 0 auto;
+      max-width: 80ch;
+    }
   }
 </style>

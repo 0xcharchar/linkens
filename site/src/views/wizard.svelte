@@ -41,4 +41,6 @@
     padding: 0;
   }
 
+  @media (min-width:801px) { /* tablet, landscape iPad, lo-res laptops ands desktops */
+  }
 </style>
