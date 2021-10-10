@@ -6,11 +6,6 @@
   import Confirmation from '../components/Confirmation.svelte'
   import { Steps, Step } from '../components/steps'
 
-  const env = {
-    ENS_REGISTRY_ADDRESS: process.env.ENS_REGISTRY_ADDRESS,
-    ENS_NODE: process.env.ENS_NODE,
-  }
-
   const provider = new ethers.providers.Web3Provider(window.ethereum)
 
   let username = ''

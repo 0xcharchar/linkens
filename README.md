@@ -6,7 +6,7 @@ _This project was built as part of the [ETHOnline 2021 Hackathon](https://showca
 
 Content:
 
-* [Links](#hackathon-project-links)
+* [Links](#links)
 * [About](#about)
 * [Architecture](#architecture)
   * [Contracts](contracts/README.md)
