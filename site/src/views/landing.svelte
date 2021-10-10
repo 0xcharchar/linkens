@@ -7,6 +7,7 @@
     <div>
       <h1>LinkENS</h1>
       <p>Link aggregation made easy</p>
+      <a class="fake-button cta cta-big" href="/wizard" use:link>Create a site</a>
       <!--
       <a class="fake-button" href="#for-creators">For Creators</a>
       <a class="fake-button" href="#for-supporters">For Supporters</a>
@@ -26,7 +27,7 @@
     <div class="description">
       <h3>LinkENS is the social link aggregator for content creators</h3>
       <p>LinkENS simplifies the process of aggregating social media links and creating a website from your account on Ethereum. LinkENS is a social link aggregator for content creators. Create a subdomain and website with all of your social networks' links at once with just one transaction on Ethereum.</p>
-      <a class="fake-button" href="/wizard" use:link>Let's build!</a>
+      <a class="fake-button cta" href="/wizard" use:link>Create a site</a>
     </div>
   </section>
 
@@ -132,6 +133,12 @@
     max-width: 30%;
   }
 
+  .cta-big {
+    max-width: 70%;
+    padding: 0.8rem;
+    font-size: 1.2em;
+  }
+
   #cutter {
     flex-direction: row;
     justify-content: center;
@@ -148,6 +155,10 @@
 
   .mh-200 {
     max-height: 200px;
+  }
+
+  .cta {
+    background: #4a8a4c;
   }
 
   @media (min-width:801px) { /* tablet, landscape iPad, lo-res laptops ands desktops */

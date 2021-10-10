@@ -83,12 +83,18 @@
     return ipfsHash
   }
 
+  let pageLink = ''
+  const toGateway = cid => `https://dweb.link/ipfs/${cid}`
+
   function createPage (profile) {
     return function (ev) {
       creatingProfile = 'triggered'
       return deployPage(profile.username)
         .then(saveProfile)
-        .then(() => { creatingProfile = 'complete' })
+        .then(ipfsHash => {
+          pageLink = toGateway(ipfsHash)
+          creatingProfile = 'complete'
+        })
         .catch(err => {
           creatingProfile = 'failed'
           console.log('error saving page', err)
@@ -112,7 +118,7 @@
 <section id="status">
   {#if creatingProfile === 'complete'}
     <p style="color: green">Page saved!</p>
-    <p>View at <a href="https://{subdomain(profile.username)}">{subdomain(profile.username)}</a></p>
+    <p>View at <a href={pageLink}>{subdomain(profile.username)}</a></p>
   {:else if creatingProfile === 'triggered'}
     <p>Saving</p>
     <p>Please approve in wallet and wait for transaction to finalize</p>
