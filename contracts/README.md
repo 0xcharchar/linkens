@@ -8,7 +8,7 @@
 
 ## Setup
 
-1. Clone project and switch to contracts
+1. Clone project and switch to _contracts_
     ```sh
     git clone https://github.com/0xcharchar/ethonline2021.git
     cd ethonline2021/contracts

@@ -12,6 +12,7 @@ Content:
   * [Contracts](contracts/README.md)
   * [Dapp](site/README.md)
   * [Backend](backend/README.md)
+* [Setup](#setup)
 
 ## Links
 
@@ -54,3 +55,9 @@ the file. When loaded in a browser, the embedded javascript will use the
 subdomain to pull ENS text records off the blockchain (via Alchemy API).
 
 This HTML file is deployed by Netlify Functions as a way to hide the web3.storage API token.
+
+## Setup
+
+A domain needs to be registered with ENS to use this application.
+Visit https://app.ens.domains and register a node on either mainnet or a
+testnet.
