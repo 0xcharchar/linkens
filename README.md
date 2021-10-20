@@ -1,25 +1,16 @@
-# ETHOnline 2021 - LinkENS
+# LinkENS
 
-LinkENS is a dapp for creators to deploy their own link aggregator website, backed by ENS.
-
-_This project was built as part of the [ETHOnline 2021 Hackathon](https://showcase.ethglobal.com/ethonline2021)._
+Create your Web3 profile and own every part of it.
 
 Content:
 
-* [Links](#links)
 * [About](#about)
+* [Principles](#principles)
 * [Architecture](#architecture)
   * [Contracts](contracts/README.md)
   * [Dapp](site/README.md)
   * [Backend](backend/README.md)
 * [Setup](#setup)
-
-## Links
-
-* [Project page](https://showcase.ethglobal.com/ethonline2021/linkens)
-* [Live demo on Ropsten](https://bafybeifcefgqrfqaavabrnxguinedbruxi5ok5zpnvnngww4kbrqhvrhku.ipfs.dweb.link/)(active until Sept 2022)
-* [Video demo](https://peertube.co.uk/videos/watch/828f8d20-45d2-4157-b29c-1c7b5c4943b9)
-* [Slides](docs/judging-slides.odp)
 
 ## About
 
@@ -28,36 +19,52 @@ is an MVP version of Linktr.ee but entirely decentralized. With the app being
 decentralized, we are able to give the user complete ownership of their data
 and the ability to have a site without worrying about hosting.
 
+If you want to build and launch your own aggregator site, visit [https://linkens.xyz]().
+
+If you trust no one, keep reading on how to launch your own generator.
+
+## Principles
+
+Open-source or bust. We believe in using strong copyleft licensing so that lock-in can be avoided.
+
+Users own their work. We believe the user should own as much of the output as possible.
+
+Support without force. We believe in helping users achieve a goal but we do not want to force them to an outcome.
+
 ## Architecture
 
 There are four key components:
 
-* the dapp
-* the custom ENS registrar
-* the user sites
+* the site generator dapp
+* the custom ENS subdomain registrar
+* the user's site
 * the site deployer
 
 ![Architecture diagram showing flow through system](docs/overall.png "Architecture diagram")
 
-The dapp is a Svelte SPA that lives on IPFS. It is automatically deployed by
+[The dapp](site/README.md) is a Svelte SPA that lives on IPFS. It is automatically deployed by
 Fleek on every push to `main`.
 
-The smart contract is the controller of the main ENS node (ethonline2021char.eth)
+[The smart contract](contracts/README.md) is the controller of the main ENS node
 and is used to register subnodes. After the subnode is registered, the
 PublicResolver is updated with any text records that were passed to the function.
 This process works exactly like `multicall` (a function on PublicResolver).
 Once all of the records are updated, ownership is transferred from the smart
 contract to the `msg.sender`.
 
-Prior to the registrar being called, an HTML file is deployed to IPFS
-(via web3.storage). This HTML file has the users chosen subdomain hardcoded into
+Prior to the registrar being called, an [HTML file is deployed](backend/README.md) to IPFS
+(via [https://web3.storage]()). This HTML file has the users chosen subdomain hardcoded into
 the file. When loaded in a browser, the embedded javascript will use the
 subdomain to pull ENS text records off the blockchain (via Alchemy API).
 
-This HTML file is deployed by Netlify Functions as a way to hide the web3.storage API token.
+This HTML file is deployed by Netlify Functions as a way to hide the web3.storage API token
+and to simplify compiling the main dapp.
 
 ## Setup
 
 A domain needs to be registered with ENS to use this application.
 Visit https://app.ens.domains and register a node on either mainnet or a
 testnet.
+
+
+_This project was originally built as part of the [ETHOnline 2021 Hackathon](https://showcase.ethglobal.com/ethonline2021/linkens)._
