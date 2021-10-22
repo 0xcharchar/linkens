@@ -11,6 +11,7 @@
   "dependencies": {
     "@ensdomains/ens-contracts": "^0.0.7",
     "ethers": "^5.4.7",
+    "node-fetch": "^3.0.0",
     "web3.storage": "^3.3.2"
   },
   "devDependencies": {
