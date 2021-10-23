@@ -67,4 +67,21 @@ describe('SiteManager', function () {
     // the person who requested the subdomain is the owner
     expect(nodeOwner).to.be.eq(await testAcct.getAddress())
   })
+
+  it('should allow changing the default resolver by contract owner', async function () {
+    const { registry, resolver } = await ensDeployer()
+    const siteManager = await deploySiteManager(registry, resolver)
+
+    const resolverFactory = await ethers.getContractFactory('PublicResolver')
+    const newResolver = await resolverFactory.deploy(registry.address, ethers.constants.AddressZero)
+
+    const originalDefault = await siteManager.s_defaultResolver()
+
+    const changeTx = await siteManager.setDefaultResolver(newResolver.address)
+    await changeTx.wait()
+
+    const changedDefault = await siteManager.s_defaultResolver()
+    expect(changedDefault).not.to.be.eq(originalDefault)
+    expect(changedDefault).to.be.eq(newResolver.address)
+  })
 })
