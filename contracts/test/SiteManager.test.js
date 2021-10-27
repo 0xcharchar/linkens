@@ -1,10 +1,12 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { expect } = require('chai')
+const { ethers } = require('hardhat')
 const { labelhash, namehash } = require('@ensdomains/ensjs')
 const { ENSRegistry } = require('@ensdomains/ens-contracts')
+const contentHash = require('@ensdomains/content-hash/dist/index.js')
 
 const TLD = 'eth'
 const DOMAIN = 'linkens'
+const IPFS_HASH = 'bafybeiekid5nvzihgsjkjy4l5zrdlrkks6mhtolwo6ht6vkbgacbyxilwq'
 
 const domain = () => `${DOMAIN}.${TLD}`
 
@@ -83,5 +85,59 @@ describe('SiteManager', function () {
     const changedDefault = await siteManager.s_defaultResolver()
     expect(changedDefault).not.to.be.eq(originalDefault)
     expect(changedDefault).to.be.eq(newResolver.address)
+  })
+
+  it('should try to update as many records as possible (for gas estimations)', async function () {
+    const { registry, resolver } = await ensDeployer()
+    const siteManager = await deploySiteManager(registry, resolver)
+
+    const node = namehash(`test.${domain()}`)
+
+    // text records
+    const textSetters = [
+      'com.twitter', 'com.facebook', 'com.instagram',
+      'com.youtube', 'com.github', 'com.pinterest'
+    ].map(key => {
+      return resolver.interface.encodeFunctionData(
+        'setText',
+        [node, key, `valueOf${key}`]
+      )
+    })
+
+    // address records
+    const addressSetters = [
+      ['14qViLJfdGaP4EeHnDyJbEGQysnCpwk3gd', '0x80000000'], // BTC
+      ['MNbHsci3A8u6UiqjBMMckXzfPrLjeMxdRC', '0x80000002'], // LTC
+      ['D5PpSeZAGghckLtep1vMwxoAZaGYmx5cv6', '0x80000003'], // DOGE
+      ['N8QGrqACXj3qoNkbQhkLVAi3MSRxcK19Xi', '0x80000007'], // Namecoin
+      ['0x4357F8BC675266ab36c01e2d36f2cbFE8Afd9FdE', '0x8000003c'], // ETH
+      ['AqUWEM9mfVxdb1etBVrz438NnyD7qHYSwv14co4cE1wU', '0x800001f5'], // Solana
+      ['PPw71sdvf1ZszjwvmPS8jjcEMYEHFGnQDZ', '0x80000294'], // PirateCash
+    ].map(([addr, coinType]) => {
+      return resolver.interface.encodeFunctionData(
+        'setAddr(bytes32,uint,bytes)',
+        [node, coinType, ethers.utils.toUtf8Bytes(addr)]
+      )
+    })
+
+    // content hash setter
+    const hashSet = resolver.interface.encodeFunctionData(
+      'setContenthash',
+      [node, `0x${contentHash.fromIpfs(IPFS_HASH)}`]
+    )
+
+    const [, testAcct] = await ethers.getSigners()
+    const regTx = await siteManager.connect(testAcct).subdomainRegister(
+      labelhash('test'),
+      [...textSetters, ...addressSetters, hashSet]
+    )
+    await regTx.wait()
+
+    /*
+    const nodeOwner = await registry.connect(testAcct).owner(namehash(`test.${domain()}`))
+
+    // the person who requested the subdomain is the owner
+    expect(nodeOwner).to.be.eq(await testAcct.getAddress())
+    */
   })
 })
