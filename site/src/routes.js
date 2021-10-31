@@ -5,8 +5,8 @@ import Wizard from './views/wizard.svelte'
 import User from './views/user.svelte'
 
 const routes = {
-  '/': Landing,
-  '/wizard': Wizard,
+  // '/': Landing,
+  '/': Wizard,
   '/user': User
 }
 

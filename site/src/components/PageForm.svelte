@@ -8,22 +8,27 @@
 </script>
 
 <section>
-  <h2>Social media profiles</h2>
-  <p>Enter only your name.</p>
-  <ul>
-    {#each profile as field (field.description)}
-      <li class="alignment">
-        <label for="link-{field.description}">{field.description}</label>
-        <input id="link-{field.description}" type="text" bind:value={field.value} />
-      </li>
-    {/each}
-  </ul>
+  <h2>Add Your links</h2>
+  <p>Add the links you want to appear on your LinkENS profile.</p>
 
-  <h2>Avatar</h2>
-  <p>If you have a CID for your avatar you can enter it into this field. Otherwise, leave blank.</p>
-  <div class="alignment">
-    <label for="avatar-cid">Avatar</label>
-    <input id="avatar-cid" type="text" bind:value={avatarCid} />
+  <div class="card">
+    <h3>username.go.here</h3>
+
+    <ul>
+      {#each profile as field (field.description)}
+        <li class="alignment">
+          <label for="link-{field.description}">{field.description}</label>
+          <input id="link-{field.description}" type="text" bind:value={field.value} />
+        </li>
+      {/each}
+    </ul>
+
+    <h2>Avatar</h2>
+    <p>If you have a CID for your avatar you can enter it into this field. Otherwise, leave blank.</p>
+    <div class="alignment">
+      <label for="avatar-cid">Avatar</label>
+      <input id="avatar-cid" type="text" bind:value={avatarCid} />
+    </div>
   </div>
 </section>
 

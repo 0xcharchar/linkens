@@ -15,13 +15,11 @@
     </div>
 
     <div class="mh-300">
-      <img src="https://picsum.photos/600/300?grayscale">
     </div>
   </section>
 
   <section id="for-creators">
     <div class="mh-200">
-      <img src="https://picsum.photos/400/200?grayscale">
     </div>
 
     <div class="description">
@@ -43,13 +41,11 @@
     </div>
 
     <div class="mh-200">
-      <img src="https://picsum.photos/400/200?grayscale">
     </div>
   </section>
 
   <section id="footer">
     <div>
-      <img src="/dummy-logo.png" width="100" height="100">
     </div>
 
     <div>

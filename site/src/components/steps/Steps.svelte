@@ -38,15 +38,6 @@
 </script>
 
 <div class="tabs">
-  <ul>
-    {#each steps as step, idx}
-      <li class:active={$currentStep === step}>
-        <p class='step-num'>{idx + 1}</p>
-        <p class='step-text'>{step.title}</p>
-      </li>
-    {/each}
-  </ul>
-
   <div class="container">
     <slot></slot>
   </div>

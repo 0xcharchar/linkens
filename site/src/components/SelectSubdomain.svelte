@@ -1,13 +1,13 @@
 <script>
   export let provider = null
   export let active = true
-  export let username = ''
 
   import { ethers } from 'ethers'
   import { ENSRegistryWithFallback } from '@ensdomains/ens-contracts'
-  import { createEventDispatcher } from 'svelte'
+  import uts46 from 'idna-uts46-hx/uts46bundle.min.js'
+  import { profile } from '../stores/profile'
 
-  const dispatch = createEventDispatcher()
+  const pipe = (...fns) => x => fns.reduce((v, fn) => fn(v), x)
 
   const States = {
     IDLE: 0,
@@ -23,7 +23,7 @@
   let status = States.IDLE
   const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, provider)
   const usernamePlaceholder = 'click-here'
-  let chosenUsername = usernamePlaceholder
+  let chosenUsername = ''
   let previous = {
     status: States.IDLE,
     username: ''
@@ -34,61 +34,42 @@
   // check the ENS registry to see if a subdomain is registered
   function checkLabel () {
     status = States.CHECKING
-    console.log('chosenusername', chosenUsername)
+    console.log('chosenusername', $profile.username)
 
-    return ensRegistry.recordExists(ethers.utils.namehash(`${chosenUsername}.${env.ENS_NODE}`))
+    return ensRegistry.recordExists(ethers.utils.namehash(`${$profile.username}.${env.ENS_NODE}`))
       .then(recordExists => {
         status = !recordExists ? States.AVAILABLE : States.UNAVAILABLE
-        username = chosenUsername.toLowerCase()
       })
       .catch(err => {
         status = States.UNAVAILABLE
       })
   }
 
-  function selectAll (ev) {
-    previous = {
-      status,
-      username: chosenUsername
-    }
+  $: {
+    const asciiEns = username => uts46.toAscii(username, { transitional: false, useStd3ASCII: true })
 
-    status = States.IDLE
-    if (window.getSelection && document.createRange) {
-      const range = document.createRange()
-      range.selectNodeContents(ev.currentTarget)
-      const sel = window.getSelection()
-      sel.removeAllRanges()
-      sel.addRange(range)
-    } else if (document.body.createTextRange) {
-      const range = document.body.createTextRange()
-      range.moveToElementText(ev.currentTarget)
-      range.select()
-    } else {
-      // no safe way to select all because execCommand is deprecated
-    }
-  }
+    let formattedName = pipe(
+      (username) => username.replaceAll(' ', ''),
+      asciiEns
+    )(chosenUsername)
 
-  function neverEmpty (ev) {
-    if (ev.currentTarget.innerHTML === '') {
-      chosenUsername = usernamePlaceholder
-    }
-    if (chosenUsername === previous.username) {
-      status = previous.status
-    }
+    profile.update(current => ({ ...current, username: formattedName }))
   }
 </script>
 
 <section>
   <slot>
-    <h2>Choose your username</h2>
+    <h2>Choose Your Name</h2>
+    <p>Enter in a subdomain to use for your LinkENS profile.</p>
   </slot>
 
   <!-- TODO when inactive, use plain text because of svelte limitation -->
-  <div id="username">
-    <div id="username-editor" contenteditable on:blur={neverEmpty} on:focus={selectAll} bind:innerHTML={chosenUsername}></div>.{env.ENS_NODE}
-  </div>
+  <div id="username" class="card">
+    <h3>{$profile.username || usernamePlaceholder}.{env.ENS_NODE}</h3>
 
-  <button on:click={checkLabel}>Check</button>
+    <input type="text" bind:value={chosenUsername} placeholder={usernamePlaceholder} />
+    <button on:click={checkLabel}>Check</button>
+  </div>
 
   <p class:hidden={status === States.IDLE} style="text-transform: capitalize;">{statusText}</p>
 </section>

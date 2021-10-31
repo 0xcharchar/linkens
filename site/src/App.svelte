@@ -1,5 +1,6 @@
 <script>
   import Router from 'svelte-spa-router'
+  import Header from './components/Header.svelte'
   import { routes } from './routes'
 
 	export let name;
@@ -8,6 +9,8 @@
 <div id="warning">
   <p>This application only works on the Ropsten testnet</p>
 </div>
+
+<Header />
 
 <Router {routes} />
 
