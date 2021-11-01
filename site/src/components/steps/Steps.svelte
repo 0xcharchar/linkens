@@ -43,8 +43,15 @@
   </div>
 
   <section id="control-buttons">
-    <button disabled={steps.indexOf($currentStep) === 0} on:click={previousStep($currentStep)}>Previous</button>
-    <button disabled={steps.indexOf($currentStep) === steps.length - 1} on:click={nextStep($currentStep)}>Next</button>
+    {#if steps.indexOf($currentStep) < (steps.length - 1)}
+      <button id="forward-btn"  on:click={nextStep($currentStep)}>Continue</button>
+    {:else}
+      <button id="final-btn" >Publish</button>
+    {/if}
+
+    {#if steps.indexOf($currentStep) > 0}
+      <button id="back-btn" on:click={previousStep($currentStep)}>Go Back</button>
+    {/if}
   </section>
 </div>
 
@@ -84,16 +91,38 @@
     display: flex;
     justify-content: space-around;
     padding: 1em;
+    flex-flow: column;
+    width: initial;
   }
 
   #control-buttons button {
     min-width: 15ch;
   }
 
+  #back-btn {
+    background: none;
+    border: none;
+    padding: 0.7em 0;
+  }
+
+  #final-btn,
+  #forward-btn {
+    color: #ffffff;
+    background: #6f82ff;
+    padding: 1.3em 0;
+    border-radius: 1.5em;
+    border: none;
+    text-align: center;
+  }
+
   @media (min-width:801px) { /* tablet, landscape iPad, lo-res laptops ands desktops */
     .container, #control-buttons {
       margin: 0 auto;
       max-width: 80ch;
+    }
+
+    #control-buttons {
+      max-width: 15%;
     }
   }
 </style>

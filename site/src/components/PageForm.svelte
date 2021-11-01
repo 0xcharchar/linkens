@@ -1,6 +1,7 @@
 <script>
   import { profile } from '../stores/profile'
   import Card from '../components/Card.svelte'
+  import NameDisplay from '../components/NameDisplay.svelte'
 
   let startingLinks = [
     { description: 'Instagram', value: '' },
@@ -16,7 +17,7 @@
   <p>Add the links you want to appear on your LinkENS profile.</p>
 
   <Card>
-    <h3>{$profile.username}.{process.env.ENS_NODE}</h3>
+    <NameDisplay>{$profile.username}</NameDisplay>
 
     <ul>
       <li>

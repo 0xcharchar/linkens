@@ -114,14 +114,17 @@
 
   <Card>
     <div class="avatar">
-      <img src={toGatewayUrl($profile.avatar)} />
+      <img src={$profile.avatar ? toGatewayUrl($profile.avatar) : ''} />
     </div>
 
     <NameDisplay>{$profile.username}</NameDisplay>
 
     <ul>
-      {#each $profile.links as link}
-        <li><em>{link.description}</em>: {link.value}</li>
+      {#each $profile.links as field (field.description)}
+        <li>
+          <label for="link-{field.description}">{field.description}</label>
+          <input disabled="disabled" id="link-{field.description}" type="text" bind:value={field.value} />
+        </li>
       {/each}
     </ul>
     <button on:click={createPage($profile)}>Save</button>
@@ -144,6 +147,11 @@
 <style>
   section {
     padding: 1em;
+  }
+
+  ul {
+    list-style-type: none;
+    padding: 0;
   }
 
   #confirmation em {
