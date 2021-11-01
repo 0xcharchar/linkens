@@ -5,7 +5,10 @@
   import { ethers } from 'ethers'
   import { ENSRegistryWithFallback } from '@ensdomains/ens-contracts'
   import uts46 from 'idna-uts46-hx/uts46bundle.min.js'
+
   import { profile } from '../stores/profile'
+  import Card from '../components/Card.svelte'
+  import NameDisplay from '../components/NameDisplay.svelte'
 
   const pipe = (...fns) => x => fns.reduce((v, fn) => fn(v), x)
 
@@ -22,7 +25,7 @@
   }
   let status = States.IDLE
   const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, provider)
-  const usernamePlaceholder = 'click-here'
+  const usernamePlaceholder = 'your-name'
   let chosenUsername = ''
   let previous = {
     status: States.IDLE,
@@ -45,16 +48,14 @@
       })
   }
 
-  $: {
-    const asciiEns = username => uts46.toAscii(username, { transitional: false, useStd3ASCII: true })
+  const asciiEns = username => uts46.toAscii(username, { transitional: false, useStd3ASCII: true })
 
-    let formattedName = pipe(
-      (username) => username.replaceAll(' ', ''),
-      asciiEns
-    )(chosenUsername)
+  const formatName = pipe(
+    (username) => username.replaceAll(/[^a-z0-9]/ig, ''),
+    asciiEns
+  )
 
-    profile.update(current => ({ ...current, username: formattedName }))
-  }
+  $: profile.update(current => ({ ...current, username: formatName(chosenUsername) }))
 </script>
 
 <section>
@@ -64,12 +65,12 @@
   </slot>
 
   <!-- TODO when inactive, use plain text because of svelte limitation -->
-  <div id="username" class="card">
-    <h3>{$profile.username || usernamePlaceholder}.{env.ENS_NODE}</h3>
+  <Card>
+    <NameDisplay>{$profile.username || formatName(usernamePlaceholder)}</NameDisplay>
 
     <input type="text" bind:value={chosenUsername} placeholder={usernamePlaceholder} />
     <button on:click={checkLabel}>Check</button>
-  </div>
+  </Card>
 
   <p class:hidden={status === States.IDLE} style="text-transform: capitalize;">{statusText}</p>
 </section>

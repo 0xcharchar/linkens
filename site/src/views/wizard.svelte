@@ -18,7 +18,7 @@
 <main>
   <Steps>
     <Step title="Select username" let:slotStep>
-      <SelectSubdomain bind:username={username} {provider} />
+      <SelectSubdomain {provider} />
     </Step>
 
     <Step title="Fill in social">

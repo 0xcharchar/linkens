@@ -3,12 +3,15 @@
   import { ENSRegistryWithFallback, Resolver } from '@ensdomains/ens-contracts'
   import contentHash from '@ensdomains/content-hash/dist/index.js'
 
-  export let profile;
+  import { profile } from '../stores/profile'
+  import NameDisplay from '../components/NameDisplay.svelte'
+  import Card from '../components/Card.svelte'
+
   export let provider;
   let signer = null
   let creatingProfile = ''
 
-  console.log('userprofile', profile)
+  console.log('userprofile', $profile)
   const env = {
     ENS_REGISTRY_ADDRESS: process.env.ENS_REGISTRY_ADDRESS,
     ENS_NODE: process.env.ENS_NODE,
@@ -53,7 +56,7 @@
     )
 
     // set all the text fields
-    const textSetters = profile.links.map(link => {
+    const textSetters = $profile.links.map(link => {
       let key = ''
       if (link.description.toLowerCase().includes('twitter')) key = 'com.twitter'
       else if (link.description.toLowerCase().includes('instagram')) key = 'com.instagram'
@@ -64,9 +67,9 @@
     }).filter(link => link !== null)
 
     let avatarSet = null
-    if (profile.avatarCid) {
+    if ($profile.avatarCid) {
       console.log('there is an avatar')
-      avatarSet = resolver.interface.encodeFunctionData('setText', [node, 'avatar', profile.avatarCid])
+      avatarSet = resolver.interface.encodeFunctionData('setText', [node, 'avatar', $profile.avatarCid])
     }
 
     const siteManager = new ethers.Contract(env.SITE_MANAGER_ADDRESS, ['function subdomainRegister(bytes32 label, bytes[] calldata data) external returns (bytes[] memory)'], signer)
@@ -101,24 +104,34 @@
         })
     }
   }
+
+  const toGatewayUrl = cid => `https://ipfs.io/ipfs/${cid}`
 </script>
 
 <section id="confirmation">
-  <h2>Confirmation</h2>
-  <p>Below are the values we will use to create your LinkENS site and store in ENS</p>
-  <ul>
-    <li><em>{profile.username}</em>.ethonline2021char.eth</li>
-    {#each profile.links as link}
-      <li><em>{link.description}</em>: {link.value}</li>
-    {/each}
-  </ul>
-  <button on:click={createPage(profile)}>Save</button>
+  <h2>Confirm Your Links</h2>
+  <p>Please review your links before publishing your LinkENS website.</p>
+
+  <Card>
+    <div class="avatar">
+      <img src={toGatewayUrl($profile.avatar)} />
+    </div>
+
+    <NameDisplay>{$profile.username}</NameDisplay>
+
+    <ul>
+      {#each $profile.links as link}
+        <li><em>{link.description}</em>: {link.value}</li>
+      {/each}
+    </ul>
+    <button on:click={createPage($profile)}>Save</button>
+  </Card>
 </section>
 
 <section id="status">
   {#if creatingProfile === 'complete'}
     <p style="color: green">Page saved!</p>
-    <p>View at <a href={pageLink}>{subdomain(profile.username)}</a></p>
+    <p>View at <a href={pageLink}>{subdomain($profile.username)}</a></p>
   {:else if creatingProfile === 'triggered'}
     <p>Saving</p>
     <p>Please approve in wallet and wait for transaction to finalize</p>
