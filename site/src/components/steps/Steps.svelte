@@ -5,6 +5,7 @@
 <script>
   import { setContext, onDestroy } from 'svelte'
   import { writable } from 'svelte/store'
+  import PrimaryBtn from '../PrimaryButton.svelte'
 
   let steps = []
   const currentStep = writable(null)
@@ -44,9 +45,9 @@
 
   <section id="control-buttons">
     {#if steps.indexOf($currentStep) < (steps.length - 1)}
-      <button id="forward-btn"  on:click={nextStep($currentStep)}>Continue</button>
+      <PrimaryBtn on:click={nextStep($currentStep)}>Continue</PrimaryBtn>
     {:else}
-      <button id="final-btn" >Publish</button>
+      <PrimaryBtn>Publish</PrimaryBtn>
     {/if}
 
     {#if steps.indexOf($currentStep) > 0}
@@ -103,16 +104,6 @@
     background: none;
     border: none;
     padding: 0.7em 0;
-  }
-
-  #final-btn,
-  #forward-btn {
-    color: #ffffff;
-    background: #6f82ff;
-    padding: 1.3em 0;
-    border-radius: 1.5em;
-    border: none;
-    text-align: center;
   }
 
   @media (min-width:801px) { /* tablet, landscape iPad, lo-res laptops ands desktops */

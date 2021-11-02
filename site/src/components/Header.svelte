@@ -1,3 +1,7 @@
+<script>
+  import PrimaryBtn from './PrimaryButton.svelte'
+</script>
+
 <header>
   <h1>LinkENS</h1>
 
@@ -10,7 +14,7 @@
       </ul>
     </nav>
 
-    <button>Connect Wallet</button>
+    <PrimaryBtn>Connect</PrimaryBtn>
 
     <div class="theme-swithcer">
     </div>
@@ -20,6 +24,15 @@
 <style>
   h1 {
     margin: 0;
+    color: #637fff;
+  }
+
+  @supports (-webkit-background-clip: text) {
+    h1 {
+      color: transparent;
+      background: linear-gradient(60deg, #637fff 0%, #918eff 30%, #79aeff 86%, #669bff 100%);
+      -webkit-background-clip: text;
+    }
   }
 
   header {
