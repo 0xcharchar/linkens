@@ -59,10 +59,10 @@
 </script>
 
 <section>
-  <slot>
-    <h2>Choose Your Name</h2>
-    <p>Enter in a subdomain to use for your LinkENS profile.</p>
-  </slot>
+  <div>
+    <slot>
+    </slot>
+  </div>
 
   <!-- TODO when inactive, use plain text because of svelte limitation -->
   <Card>
@@ -71,8 +71,6 @@
     <input type="text" bind:value={chosenUsername} placeholder={usernamePlaceholder} />
     <button on:click={checkLabel}>Check</button>
   </Card>
-
-  <p class:hidden={status === States.IDLE} style="text-transform: capitalize;">{statusText}</p>
 </section>
 
 <style>
@@ -83,10 +81,6 @@
     align-items: center;
     gap: 2rem;
     margin: 1em;
-  }
-
-  h2 {
-    margin: 0;
   }
 
   .hidden {

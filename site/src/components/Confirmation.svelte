@@ -109,8 +109,7 @@
 </script>
 
 <section id="confirmation">
-  <h2>Confirm Your Links</h2>
-  <p>Please review your links before publishing your LinkENS website.</p>
+  <slot></slot>
 
   <Card>
     <div class="avatar">

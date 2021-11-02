@@ -13,8 +13,7 @@
 </script>
 
 <section>
-  <h2>Add Your links</h2>
-  <p>Add the links you want to appear on your LinkENS profile.</p>
+  <slot></slot>
 
   <Card>
     <NameDisplay>{$profile.username}</NameDisplay>
