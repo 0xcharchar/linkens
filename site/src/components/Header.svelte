@@ -24,6 +24,7 @@
 <style>
   h1 {
     margin: 0;
+    margin-left: 1em;
     color: #637fff;
   }
 
