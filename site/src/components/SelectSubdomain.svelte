@@ -1,7 +1,7 @@
 <script>
   export let provider = null
-  export let active = true
 
+  import { onMount } from 'svelte'
   import { ethers } from 'ethers'
   import { ENSRegistryWithFallback } from '@ensdomains/ens-contracts'
   import uts46 from 'idna-uts46-hx/uts46bundle.min.js'
@@ -56,6 +56,11 @@
   )
 
   $: profile.update(current => ({ ...current, username: formatName(chosenUsername) }))
+
+  let usernameField
+  onMount(() => {
+    usernameField.focus()
+  })
 </script>
 
 <section>
@@ -68,7 +73,7 @@
   <Card>
     <NameDisplay>{$profile.username || formatName(usernamePlaceholder)}</NameDisplay>
 
-    <input type="text" bind:value={chosenUsername} placeholder={usernamePlaceholder} />
+    <input type="text" bind:value={chosenUsername} placeholder={usernamePlaceholder} bind:this={usernameField} />
     <button on:click={checkLabel}>Check</button>
   </Card>
 </section>
@@ -96,5 +101,9 @@
 
   #username-editor:focus {
     font-weight: normal;
+  }
+
+  input {
+    outline: none;
   }
 </style>
