@@ -18,11 +18,12 @@
     ENS_REGISTRY_ADDRESS: process.env.ENS_REGISTRY_ADDRESS,
     ENS_NODE: process.env.ENS_NODE,
   }
-  let status = States.IDLE
   const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, provider)
+  let inputDelayTimeout
   const usernamePlaceholder = 'your-name'
   let chosenUsername = $profile.username || ''
-  let inputDelayTimeout
+  let status = States.IDLE
+  if (chosenUsername) checkLabel()
 
   function handleDomainCheck (e) {
     if (inputDelayTimeout) {
