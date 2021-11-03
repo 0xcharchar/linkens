@@ -111,10 +111,12 @@
 <section id="confirmation">
   <slot></slot>
 
+  <div class="avatar">
+    <img src={$profile.avatar ? toGatewayUrl($profile.avatar) : ''} />
+  </div>
+
   <Card>
-    <div class="avatar">
-      <img src={$profile.avatar ? toGatewayUrl($profile.avatar) : ''} />
-    </div>
+    <div class="spacer"></div>
 
     <NameDisplay>{$profile.username}</NameDisplay>
 
@@ -168,6 +170,20 @@
     width: 100%;
   }
 
+  .avatar {
+    width: 130px;
+    height: 130px;
+    overflow: hidden;
+    margin: 0 auto;
+    position: relative;
+    bottom: -70px;
+    border-radius: 1em;
+  }
+
+  .avatar > img {
+    width: 120%;
+  }
+
   #confirmation em {
     font-weight: bold;
     font-style: normal;
@@ -180,5 +196,9 @@
 
   #status {
     text-align: center;
+  }
+
+  .spacer {
+    height: 70px;
   }
 </style>
