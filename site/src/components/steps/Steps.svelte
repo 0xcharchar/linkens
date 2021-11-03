@@ -109,7 +109,7 @@
   @media (min-width:801px) { /* tablet, landscape iPad, lo-res laptops ands desktops */
     .container, #control-buttons {
       margin: 0 auto;
-      max-width: 80ch;
+      width: 60ch;
     }
 
     #control-buttons {
