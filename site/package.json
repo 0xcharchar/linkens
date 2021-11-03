@@ -24,6 +24,7 @@
     "@ensdomains/content-hash": "^2.5.7",
     "@ensdomains/ens-contracts": "^0.0.7",
     "@rodneylab/svelte-social-icons": "^0.0.12",
+    "@svicons/ionicons-solid": "^0.1.3",
     "ethers": "^5.4.7",
     "idna-uts46-hx": "^3.4.0",
     "rollup-plugin-polyfill-node": "^0.7.0",

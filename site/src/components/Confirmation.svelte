@@ -151,6 +151,21 @@
   ul {
     list-style-type: none;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  li {
+    margin: 1em 0;
+  }
+
+  label {
+    margin-bottom: 0.6em;
+  }
+
+  input {
+    width: 100%;
   }
 
   #confirmation em {
