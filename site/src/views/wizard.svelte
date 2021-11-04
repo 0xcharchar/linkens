@@ -7,12 +7,6 @@
   import { Steps, Step } from '../components/steps'
 
   const provider = new ethers.providers.Web3Provider(window.ethereum)
-
-  let username = ''
-  let links
-  let avatarCid = ''
-
-  $: userProfile = { username, links, avatarCid }
 </script>
 
 <main>
@@ -25,14 +19,14 @@
     </Step>
 
     <Step title="Fill in social">
-      <PageForm bind:avatarCid={avatarCid} bind:profile={links}>
+      <PageForm>
         <h2>Add Your links</h2>
         <p class="subtitle">Add the links you want to appear on your LinkENS profile.</p>
       </PageForm>
     </Step>
 
     <Step title="Confirmation">
-      <Confirmation profile={userProfile} {provider}>
+      <Confirmation {provider}>
         <h2>Confirm Your Links</h2>
         <p class="subtitle">Please review your links before publishing your LinkENS website.</p>
       </Confirmation>
