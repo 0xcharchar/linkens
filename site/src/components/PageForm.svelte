@@ -9,7 +9,10 @@
     { description: 'Facebook', value: '' },
   ]
 
-  profile.update(p => ({ ...p, links: startingLinks }))
+  // set default values if nothing there yet
+  if (!$profile.links || $profile.links.length === 0) {
+    profile.update(p => ({ ...p, links: startingLinks }))
+  }
 </script>
 
 <section>
