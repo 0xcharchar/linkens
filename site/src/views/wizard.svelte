@@ -7,11 +7,14 @@
   import { Steps, Step } from '../components/steps'
 
   const provider = new ethers.providers.Web3Provider(window.ethereum)
+
+  let confirmation
+  $: confirmationAction = (confirmation && confirmation.action) || null
 </script>
 
 <main>
   <Steps>
-    <Step title="Select username" let:slotStep>
+    <Step title="Select username">
       <SelectSubdomain {provider}>
         <h2>Choose Your Name</h2>
         <p class="subtitle">Enter in a subdomain to use for your LinkENS profile.</p>
@@ -25,8 +28,8 @@
       </PageForm>
     </Step>
 
-    <Step title="Confirmation">
-      <Confirmation {provider}>
+    <Step title="Confirmation" action={confirmationAction}>
+      <Confirmation bind:this={confirmation} {provider}>
         <h2>Confirm Your Links</h2>
         <p class="subtitle">Please review your links before publishing your LinkENS website.</p>
       </Confirmation>

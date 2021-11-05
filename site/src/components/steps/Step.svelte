@@ -3,14 +3,20 @@
   import { STEPS } from './Steps.svelte'
 
   export let title
+  export let action = null
 
+  const { currentStep, register, setAction } = getContext(STEPS)
   const step = { title }
-  const { registerStep, currentStep } = getContext(STEPS)
+  register(step)
 
-  registerStep(step)
+  const regAction = setAction(step)
+  $: {
+    console.log('action recived', action)
+    regAction(action)
+  }
 </script>
 
 <!-- TODO need to validate that a step is complete -->
 {#if $currentStep === step}
-  <slot slotStep={step}></slot>
+  <slot></slot>
 {/if}

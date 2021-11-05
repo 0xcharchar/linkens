@@ -7,7 +7,13 @@
   import NameDisplay from '../components/NameDisplay.svelte'
   import Card from '../components/Card.svelte'
 
-  export let provider;
+  export let provider = null
+
+  // TODO this should be the submission function
+  export function action () {
+    console.log('from confiramtion')
+  }
+
   let signer = null
   let creatingProfile = ''
 

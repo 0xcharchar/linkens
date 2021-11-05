@@ -8,18 +8,24 @@
   import PrimaryBtn from '../PrimaryButton.svelte'
 
   let steps = []
+  let stepsData = {}
   const currentStep = writable(null)
 
   setContext(STEPS, {
-    registerStep: step => {
+    register: step => {
       steps = [...steps, step]
+      stepsData[step] = {}
       currentStep.update(current => current || step)
 
       onDestroy(() => {
         const idx = steps.indexOf(step)
-        steps = [...steps.slice(0, idx), ...items.slice(idx + 1)]
+        steps = [...steps.slice(0, idx), ...steps.slice(idx + 1)]
         currentStep.update(current => current === step ? (steps[idx] || steps[steps.length - 1]) : current)
       })
+    },
+
+    setAction: step => action => {
+      stepsData[step] = { ...stepsData[step], action }
     },
 
     currentStep
@@ -35,7 +41,12 @@
     currentStep.set(steps[idx - 1])
   }
 
-  $: console.log('ct', $currentStep)
+  const doAction = step => ev => {
+    console.log('we out here', step)
+    if (!stepsData[step].action) return
+
+    stepsData[step].action(ev)
+  }
 </script>
 
 <div class="tabs">
@@ -47,7 +58,7 @@
     {#if steps.indexOf($currentStep) < (steps.length - 1)}
       <PrimaryBtn on:click={nextStep($currentStep)}>Continue</PrimaryBtn>
     {:else}
-      <PrimaryBtn>Publish</PrimaryBtn>
+      <PrimaryBtn on:click={doAction($currentStep)}>Publish</PrimaryBtn>
     {/if}
 
     {#if steps.indexOf($currentStep) > 0}
