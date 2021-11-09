@@ -1,4 +1,5 @@
 <script>
+  import { createEventDispatcher } from 'svelte'
   import { ethers } from 'ethers'
   import { ENSRegistryWithFallback, Resolver } from '@ensdomains/ens-contracts'
   import contentHash from '@ensdomains/content-hash/dist/index.js'
@@ -7,11 +8,16 @@
   import NameDisplay from '../components/NameDisplay.svelte'
   import Card from '../components/Card.svelte'
 
+  const dispatch = createEventDispatcher()
+  const Events = {
+    PUBLISH_STATE: 'publishState'
+  }
+
   export let provider = null
 
-  // TODO this should be the submission function
-  export function action () {
-    console.log('from confiramtion')
+  export function stepAction () {
+    console.log('in confirmation step action')
+    return createPage($profile)
   }
 
   let signer = null
@@ -95,20 +101,18 @@
   let pageLink = ''
   const toGateway = cid => `https://dweb.link/ipfs/${cid}`
 
-  function createPage (profile) {
-    return function (ev) {
-      creatingProfile = 'triggered'
-      return deployPage(profile.username)
-        .then(saveProfile)
-        .then(ipfsHash => {
-          pageLink = toGateway(ipfsHash)
-          creatingProfile = 'complete'
-        })
-        .catch(err => {
-          creatingProfile = 'failed'
-          console.log('error saving page', err)
-        })
-    }
+  function createPage (profileData) {
+    dispatch(Events.PUBLISH_STATE, { state: 'triggered' })
+    return deployPage(profileData.username)
+      .then(saveProfile)
+      .then(ipfsHash => {
+        pageLink = toGateway(ipfsHash)
+        dispatch(Events.PUBLISH_STATE, { state: 'complete' })
+      })
+      .catch(err => {
+        dispatch(Events.PUBLISH_STATE, { state: 'failed' })
+        console.log('error saving page', err)
+      })
   }
 
   const toGatewayUrl = cid => `https://ipfs.io/ipfs/${cid}`
@@ -134,21 +138,7 @@
         </li>
       {/each}
     </ul>
-    <button on:click={createPage($profile)}>Save</button>
   </Card>
-</section>
-
-<section id="status">
-  {#if creatingProfile === 'complete'}
-    <p style="color: green">Page saved!</p>
-    <p>View at <a href={pageLink}>{subdomain($profile.username)}</a></p>
-  {:else if creatingProfile === 'triggered'}
-    <p>Saving</p>
-    <p>Please approve in wallet and wait for transaction to finalize</p>
-  {:else if creatingProfile === 'failed'}
-    <p style="color: red">Saving to ENS failed</p>
-  {:else}
-  {/if}
 </section>
 
 <style>

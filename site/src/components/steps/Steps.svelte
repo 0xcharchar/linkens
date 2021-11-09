@@ -42,10 +42,9 @@
   }
 
   const doAction = step => ev => {
-    console.log('we out here', step)
     if (!stepsData[step].action) return
 
-    stepsData[step].action(ev)
+    return stepsData[step].action(ev)
   }
 </script>
 
@@ -124,7 +123,7 @@
     }
 
     #control-buttons {
-      max-width: 15%;
+      max-width: 25ch;
     }
   }
 </style>

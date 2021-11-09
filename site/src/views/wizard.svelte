@@ -1,5 +1,6 @@
 <script>
   import { ethers } from 'ethers'
+  import { onMount } from 'svelte'
 
   import PageForm from '../components/PageForm.svelte'
   import SelectSubdomain from '../components/SelectSubdomain.svelte'
@@ -9,7 +10,7 @@
   const provider = new ethers.providers.Web3Provider(window.ethereum)
 
   let confirmation
-  $: confirmationAction = (confirmation && confirmation.action) || null
+  $: confirmationAction = (confirmation && confirmation.stepAction) || null
 </script>
 
 <main>
