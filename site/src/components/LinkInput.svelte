@@ -1,7 +1,4 @@
 <script>
-  import SocialIcons from '@rodneylab/svelte-social-icons'
-  import iconDef from '@rodneylab/svelte-social-icons/src/_networks-db.js'
-
   export let network
 
   const isNetwork = !!iconDef[network]
@@ -9,7 +6,7 @@
 
 <div id="container">
   {#if isNetwork}
-    <SocialIcons network={network} fgColor={iconDef[network].color} bgColor="#ffffff" />
+    {network}
   {:else}
     <div id="false-badge"></div>
   {/if}
