@@ -86,7 +86,7 @@ module.exports = env => {
           : JSON.stringify('https://api.blocknative.com'),
         EXPORT_CONFIG: isStaging
       }),
-      new Dotenv()
+      new Dotenv({ systemvars: true })
     ],
     devtool: prod ? false : 'source-map'
   }

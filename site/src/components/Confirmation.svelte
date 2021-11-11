@@ -30,6 +30,7 @@
     RESOLVER_ADDRESS: process.env.RESOLVER_ADDRESS,
     DEPLOY_IPFS_ROUTE: process.env.DEPLOY_IPFS_ROUTE,
     SITE_MANAGER_ADDRESS: process.env.SITE_MANAGER_ADDRESS,
+    MINIMUM_GAS: 10000,
   }
 
   const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, provider)
