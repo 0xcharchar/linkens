@@ -27,6 +27,7 @@
     "webpack-dev-server": "^3.3.1"
   },
   "dependencies": {
+    "@download/blockies": "^1.0.3",
     "@ensdomains/content-hash": "^2.5.7",
     "@ensdomains/ens-contracts": "^0.0.7",
     "@svicons/ionicons-solid": "^0.1.3",
