@@ -30,7 +30,7 @@
     RESOLVER_ADDRESS: process.env.RESOLVER_ADDRESS,
     DEPLOY_IPFS_ROUTE: process.env.DEPLOY_IPFS_ROUTE,
     SITE_MANAGER_ADDRESS: process.env.SITE_MANAGER_ADDRESS,
-    MINIMUM_GAS: 10000,
+    MINIMUM_GAS: 280000,
   }
 
   const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, provider)
@@ -62,36 +62,42 @@
     const resolverAddr = await ensRegistry.resolver(node)
     const resolver = new ethers.Contract(resolverAddr, Resolver, signer)
 
-    // set contenthash
-    const hashSet = resolver.interface.encodeFunctionData(
-      'setContenthash',
-      [node, `0x${contentHash.fromIpfs(ipfsHash)}`]
-    )
-
-    // set all the text fields
-    const textSetters = $profile.links.map(link => {
+    function linkSet (link) {
       let key = ''
       if (link.description.toLowerCase().includes('twitter')) key = 'com.twitter'
       else if (link.description.toLowerCase().includes('instagram')) key = 'com.instagram'
       else if (link.description.toLowerCase().includes('facebook')) key = 'com.facebook'
       else return null
 
-      return resolver.interface.encodeFunctionData('setText', [node, key, link.value])
-    }).filter(link => link !== null)
-
-    let avatarSet = null
-    if ($profile.avatarCid) {
-      console.log('there is an avatar')
-      avatarSet = resolver.interface.encodeFunctionData('setText', [node, 'avatar', $profile.avatarCid])
+      return ['setText', [node, key, link.value]]
     }
 
-    const siteManager = new ethers.Contract(env.SITE_MANAGER_ADDRESS, ['function subdomainRegister(bytes32 label, bytes[] calldata data) external returns (bytes[] memory)'], signer)
+    const resolverFunctions = [
+      ['setContenthash', [node, `0x${contentHash.fromIpfs(ipfsHash)}`]],
+      $profile.avatarCid ? ['setText', [node, 'avatar', $profile.avatarCid]] : null,
+      ...$profile.links.map(linkSet)
+    ].filter(fn => fn !== null)
 
-    const encodedFunctions = [hashSet, ...textSetters, avatarSet].filter(f => f)
+    const encodedFunctions = resolverFunctions
+      .map(([fn, args]) => resolver.interface.encodeFunctionData(fn, args))
 
     console.log('multicalldata', encodedFunctions)
     console.log('label', label, ethers.utils.id(label))
-    const multiTx = await siteManager.subdomainRegister(ethers.utils.id(label), encodedFunctions, { gasLimit: 500000 })
+
+    const gasEstimate = (await Promise.all(
+      resolverFunctions
+      .map(([fn, args]) => resolver.estimateGas[fn](...args))
+    )).reduce((acc, val) => acc.add(val), ethers.BigNumber.from(env.MINIMUM_GAS))
+
+    const siteManager = new ethers.Contract(env.SITE_MANAGER_ADDRESS, ['function subdomainRegister(bytes32 label, bytes[] calldata data) external returns (bytes[] memory)'], signer)
+
+    console.log('gasEstimate', gasEstimate, gasEstimate.toString())
+
+    const multiTx = await siteManager.subdomainRegister(
+      ethers.utils.id(label),
+      encodedFunctions,
+      { gasLimit: gasEstimate }
+    )
     const txResult = await multiTx.wait()
 
     console.log('txresult', txResult)
