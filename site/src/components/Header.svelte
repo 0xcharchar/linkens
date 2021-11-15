@@ -1,58 +1,10 @@
 <script>
-  import Onboard from 'bnc-onboard'
-  import { ethers } from 'ethers'
-
-  import { provider, address, connected, ens } from '../stores/ethereum'
+  import { connected, connectWallet } from '../stores/ethereum'
   import PrimaryBtn from './PrimaryButton.svelte'
   import Profile from './Profile.svelte'
 
-  const rpcUrl = process.env.ALCHEMY_API_RPC_URL
-
-  const onboard = Onboard({
-    dappId: process.env.BLOCKNATIVE_API_KEY,
-    networkId: 3,
-
-    subscriptions: {
-      address: addressVal => address.set(addressVal || ''),
-      ens: ensVal => ens.set(ensVal || {}),
-      wallet: wallet => {
-        if (!wallet) {
-          provider.set(null)
-          connected.set(false)
-        }
-
-        provider.set(new ethers.providers.Web3Provider(wallet.provider))
-        connected.set(true)
-      }
-    },
-
-    walletSelect: {
-      wallets: [
-        { walletName: 'metamask' },
-        {
-          walletName: 'walletConnect',
-          infuraKey: process.env.INFURA_PROJECT_ID
-        },
-        {
-          walletName: 'trezor',
-          appUrl: 'https://linkens.xyz',
-          email: 'team@linkens.xyz',
-          rpcUrl
-        },
-        {
-          walletName: 'ledger',
-          rpcUrl
-        }
-      ]
-    }
-  })
-
   async function handleConnect () {
-    const selected = await onboard.walletSelect()
-    if (!selected) return /* TODO show an error */
-
-    const connected = await onboard.walletCheck()
-    if (!connected) return /* TODO show an error */
+    await connectWallet()
   }
 </script>
 

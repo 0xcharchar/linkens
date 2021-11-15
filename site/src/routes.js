@@ -1,12 +1,12 @@
-import { wrap } from 'svelte-spa-router/wrap'
-
-import Landing from './views/landing.svelte'
-import Wizard from './views/wizard.svelte'
+import SelectSubdomain from './views/select-subdomain.svelte'
+import SocialsForm from './views/socials-form.svelte'
+import Confirmation from './views/confirmation.svelte'
 import User from './views/user.svelte'
 
 const routes = {
-  // '/': Landing,
-  '/': Wizard,
+  '/': SelectSubdomain,
+  '/socials': SocialsForm,
+  '/confirm': Confirmation,
   '/user': User
 }
 

@@ -1,27 +1,38 @@
 <script>
-  import { createEventDispatcher } from 'svelte'
+  import { push, replace } from 'svelte-spa-router'
   import { ethers } from 'ethers'
   import { ENSRegistryWithFallback, Resolver } from '@ensdomains/ens-contracts'
   import contentHash from '@ensdomains/content-hash/dist/index.js'
 
-  import { profile } from '../stores/profile'
   import NameDisplay from '../components/NameDisplay.svelte'
   import Card from '../components/Card.svelte'
+  import FormControls from '../components/FormControls.svelte'
+  import FormTitle from '../components/FormTitle.svelte'
 
-  const dispatch = createEventDispatcher()
-  const Events = {
-    PUBLISH_STATE: 'publishState'
+  import { profile } from '../stores/profile'
+  import { connected, connectWallet, provider } from '../stores/ethereum'
+
+  // Jump back to first page if key data missing
+  if (!$profile.username) replace('/')
+
+  function publishBtn (ev) {
+    console.log('in confirmation step action')
+    if ($connected) {
+      createPage($profile)
+    } else {
+      console.log('need to connect wallet')
+      connectWallet()
+    }
   }
 
-  export let provider = null
-
-  export function stepAction () {
-    console.log('in confirmation step action')
-    return createPage($profile)
+  function backBtn (ev) {
+    push('/socials')
   }
 
   let signer = null
   let creatingProfile = ''
+
+  provider.subscribe(p => signer = p && p.getSigner() || null)
 
   console.log('userprofile', $profile)
   const env = {
@@ -33,7 +44,6 @@
     MINIMUM_GAS: 280000,
   }
 
-  const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, provider)
 
   const subdomain = label => `${label}.${env.ENS_NODE}`
   const hasher = node => ethers.utils.namehash(node)
@@ -51,9 +61,16 @@
 
   async function saveProfile ({ ipfsHash, label }) {
     if (!signer) {
+      console.log('No signer?!')
+      throw new Error('Missing signer')
+
+      /*
       await provider.send("eth_requestAccounts", [])
       signer = provider.getSigner()
+      */
     }
+
+    const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, $provider)
 
     console.log('ipfshash', ipfsHash)
     console.log('hashed', contentHash.fromIpfs(ipfsHash))
@@ -117,15 +134,12 @@
   const toGateway = cid => `https://dweb.link/ipfs/${cid}`
 
   function createPage (profileData) {
-    dispatch(Events.PUBLISH_STATE, { state: 'triggered' })
     return deployPage(profileData.username)
       .then(saveProfile)
       .then(ipfsHash => {
         pageLink = toGateway(ipfsHash)
-        dispatch(Events.PUBLISH_STATE, { state: 'complete' })
       })
       .catch(err => {
-        dispatch(Events.PUBLISH_STATE, { state: 'failed' })
         console.log('error saving page', err)
       })
   }
@@ -133,30 +147,50 @@
   const toGatewayUrl = cid => `https://ipfs.io/ipfs/${cid}`
 </script>
 
-<section id="confirmation">
-  <slot></slot>
+<main>
+  <section id="confirmation">
+    <FormTitle
+      title="Confirm Your Links"
+      subtitle="Please review your links before publishing your LinkENS website." />
 
-  <div class="avatar">
-    <img src={$profile.avatar ? toGatewayUrl($profile.avatar) : ''} />
-  </div>
+    <div class="avatar">
+      <img src={$profile.avatar ? toGatewayUrl($profile.avatar) : ''} />
+    </div>
 
-  <Card>
-    <div class="spacer"></div>
+    <Card>
+      <div class="spacer"></div>
 
-    <NameDisplay>{$profile.username}</NameDisplay>
+      <NameDisplay>{$profile.username}</NameDisplay>
 
-    <ul>
-      {#each $profile.links as field (field.description)}
-        <li>
-          <label for="link-{field.description}">{field.description}</label>
-          <input disabled="disabled" id="link-{field.description}" type="text" bind:value={field.value} />
-        </li>
-      {/each}
-    </ul>
-  </Card>
-</section>
+      <ul>
+        {#each $profile.links as field (field.description)}
+          <li>
+            <label for="link-{field.description}">{field.description}</label>
+            <input disabled="disabled" id="link-{field.description}" type="text" bind:value={field.value} />
+          </li>
+        {/each}
+      </ul>
+    </Card>
+  </section>
+
+  <FormControls
+    mainBtnText={$connected ? 'Publish' : 'Connect'}
+    on:primaryClick={publishBtn}
+    on:secondaryClick={backBtn} />
+</main>
 
 <style>
+  main {
+    padding: 0;
+  }
+
+  @media (min-width:801px) { /* tablet, landscape iPad, lo-res laptops ands desktops */
+    main {
+      margin: 0 auto;
+      width: 60ch;
+    }
+  }
+
   section {
     padding: 1em;
   }
