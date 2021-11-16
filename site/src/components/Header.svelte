@@ -77,9 +77,11 @@
     padding: 1em 1.5em;
     color: #717379;
     text-decoration: none;
+    transition: 0.5s;
   }
 
   li > a:hover {
-    text-decoration: underline;
+    color: #577AFF;
+    transition: 0.5s;
   }
 </style>
