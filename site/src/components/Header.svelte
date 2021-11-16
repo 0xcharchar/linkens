@@ -2,6 +2,7 @@
   import { connected, connectWallet } from '../stores/ethereum'
   import PrimaryBtn from './PrimaryButton.svelte'
   import Profile from './Profile.svelte'
+  import ThemeSwitcher from './ThemeSwitcher.svelte'
 
   async function handleConnect () {
     await connectWallet()
@@ -26,8 +27,7 @@
       <PrimaryBtn on:click={handleConnect}>Connect</PrimaryBtn>
     {/if}
 
-    <div class="theme-swithcer">
-    </div>
+    <ThemeSwitcher />
   </section>
 </header>
 

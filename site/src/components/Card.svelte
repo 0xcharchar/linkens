@@ -4,7 +4,7 @@
 
 <style>
   div {
-    background: #ffffff;
+    background: var(--color-card-background);
     padding: 2em;
     border-radius: 1em;
     width: 100%;

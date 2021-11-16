@@ -134,6 +134,7 @@
   }
 
   input {
+    background-color: transparent;
     flex-grow: 2;
     margin: 0;
     border: none;

@@ -213,6 +213,8 @@
 
   input {
     width: 100%;
+    border: none;
+    background-color: var(--color-input-readonly-background);
   }
 
   .avatar {

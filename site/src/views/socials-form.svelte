@@ -79,6 +79,8 @@
 
   input {
     width: 100%;
+    border: none;
+    background-color: var(--color-input-background);
   }
 
   @media (min-width:801px) { /* tablet, landscape iPad, lo-res laptops ands desktops */
