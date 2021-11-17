@@ -4,12 +4,15 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf build/*",
-    "build": "npm run clean && NODE_ENV=production webpack --env.STAGING=false",
+    "build": "npm run clean && concurrently \"npm:build:*\"",
+    "build:dapp": "NODE_ENV=production webpack --env.STAGING=false",
+    "build:user": "NODE_ENV=production webpack --config webpack.user.config.js --env.STAGING=false",
     "dev": "webpack-dev-server --env.STAGING=false --https --content-base public --port 5000"
   },
   "devDependencies": {
     "@vue/preload-webpack-plugin": "^2.0.0",
     "babel-eslint": "^10.1.0",
+    "concurrently": "^6.4.0",
     "copy-webpack-plugin": "^6.4.1",
     "css-loader": "^2.1.1",
     "dotenv": "^10.0.0",

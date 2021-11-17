@@ -14,7 +14,7 @@ module.exports = env => {
 
   return {
     entry: {
-      bundle: ['./src/main.js']
+      bundle: ['./src/user.js']
     },
     devServer: {
       historyApiFallback: true
@@ -27,7 +27,7 @@ module.exports = env => {
       mainFields: ['svelte', 'browser', 'module', 'main']
     },
     output: {
-      path: path.join(__dirname, 'build', 'dapp'),
+      path: path.join(__dirname, 'build', 'user'),
       filename: '[name].[contentHash].js',
       chunkFilename: '[name].[contentHash].[id].js'
     },
@@ -67,7 +67,7 @@ module.exports = env => {
     mode,
     plugins: [
       new HtmlWebpackPlugin({
-        template: 'public/index.html',
+        template: 'public/user.html',
         scriptLoading: 'defer'
       }),
       new MiniCssExtractPlugin({
