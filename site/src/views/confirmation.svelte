@@ -11,18 +11,19 @@
 
   import { profile } from '../stores/profile'
   import { connected, connectWallet, provider } from '../stores/ethereum'
+  import { toGatewayUrl } from '../lib/transformers'
 
   // Jump back to first page if key data missing
   if (!$profile.username) replace('/')
 
-  function publishBtn (ev) {
+  async function publishBtn (ev) {
     console.log('in confirmation step action')
-    if ($connected) {
-      createPage($profile)
-    } else {
+    if (!$connected) {
       console.log('need to connect wallet')
-      connectWallet()
+      await connectWallet()
     }
+
+    createPage($profile)
   }
 
   function backBtn (ev) {
@@ -131,20 +132,20 @@
   }
 
   let pageLink = ''
-  const toGateway = cid => `https://dweb.link/ipfs/${cid}`
 
   function createPage (profileData) {
     return deployPage(profileData.username)
       .then(saveProfile)
       .then(ipfsHash => {
-        pageLink = toGateway(ipfsHash)
+        pageLink = toGatewayUrl(ipfsHash)
+      })
+      .then(() => {
+        push('/user')
       })
       .catch(err => {
         console.log('error saving page', err)
       })
   }
-
-  const toGatewayUrl = cid => `https://ipfs.io/ipfs/${cid}`
 </script>
 
 <main>
