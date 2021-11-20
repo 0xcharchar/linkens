@@ -4,12 +4,8 @@
 
   import './global.css'
   import ThemeSwitcher from './components/ThemeSwitcher.svelte'
-  import PrimaryBtn from './components/PrimaryButton.svelte'
   import UserCard from './components/UserCard.svelte'
-  import Card from './components/Card.svelte'
-
   import { theme } from './stores/theme'
-  import { connected, connectWallet } from './stores/ethereum'
 
   export let subdomain = ''
 
@@ -53,14 +49,6 @@
     };
   }
 
-  async function handleConnect () {
-    await connectWallet()
-    // TODO
-    // sign message
-    // verify that wallet matches
-    // make content editable
-  }
-
   let profile
   onMount(async () => {
     profile = await loadProfile()
@@ -82,67 +70,22 @@
   {/if}
 </main>
 
-<button id="menu-button" on:click={() => menuActive = !menuActive}>
-  menu
-</button>
-
-<nav class:visible={menuActive}>
-  <Card>
-    <ul>
-      <li><PrimaryBtn on:click={handleConnect}>Login</PrimaryBtn></li>
-      <li><ThemeSwitcher /></li>
-    </ul>
-  </Card>
-</nav>
+<div id="theme-button">
+  <ThemeSwitcher />
+</div>
 
 <style>
   main {
     padding: 0;
   }
 
-  button {
+  #theme-button {
     position: absolute;
     bottom: 1em;
     right: 1em;
     display: block;
     height: 3em;
     width: 3em;
-    background-color: #637fff;
-    background-image: linear-gradient(60deg, #637fff 0%, #918eff 15%, #79aeff 40%, #669bff 80%, #918eff 100%);
-    background-size: 200%;
-    text-align: center;
-    transition: 0.5s;
-    color: #ffffff;
-    border-radius: 50%;
-  }
-
-  button:hover {
-    background-position: right center;
-    color: #fff;
-    text-decoration: none;
-  }
-
-  nav.visible {
-    display: flex;
-    flex-direction: column;
-  }
-
-  nav {
-    display: none;
-    position: absolute;
-    bottom: 5.4em;
-    right: 1em;
-    min-width: 10em;
-  }
-
-  ul {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    gap: 1em;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
   }
 
   @media (min-width:801px) { /* tablet, landscape iPad, lo-res laptops ands desktops */

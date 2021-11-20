@@ -10,8 +10,6 @@ const mode = process.env.NODE_ENV || 'development'
 const prod = mode === 'production'
 
 module.exports = env => {
-  const isStaging = env.STAGING === 'true'
-
   return {
     entry: {
       bundle: ['./src/user.js']
@@ -75,16 +73,6 @@ module.exports = env => {
       }),
       new PreloadWebpackPlugin({
         fileWhitelist: [/\.css$/]
-      }),
-      new webpack.DefinePlugin({
-        STAGING: JSON.stringify(isStaging),
-        WS_URL: isStaging
-          ? JSON.stringify('wss://staging.api.blocknative.com/v0')
-          : JSON.stringify('wss://api.blocknative.com/v0'),
-        API_URL: isStaging
-          ? JSON.stringify('https://staging.api.blocknative.com')
-          : JSON.stringify('https://api.blocknative.com'),
-        EXPORT_CONFIG: isStaging
       }),
       new Dotenv({ systemvars: true })
     ],

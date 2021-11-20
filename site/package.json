@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf build/*",
+    "clean:dapp": "rm -rf build/dapp/*",
+    "clean:user": "rm -rf build/user/*",
     "build": "npm run clean && concurrently \"npm:build:*\"",
     "build:dapp": "NODE_ENV=production webpack --env.STAGING=false",
-    "build:user": "NODE_ENV=production webpack --config webpack.user.config.js --env.STAGING=false",
+    "build:user": "NODE_ENV=production webpack --config webpack.user.config.js",
     "dev": "npm run dev:dapp",
     "dev:dapp": "webpack-dev-server --env.STAGING=false --https --content-base public --port 5000",
-    "dev:user": "webpack-dev-server --config webpack.user.config.js --env.STAGING=false --https --content-base public --port 5001"
+    "dev:user": "webpack-dev-server --config webpack.user.config.js --https --content-base public --port 5001"
   },
   "devDependencies": {
     "@vue/preload-webpack-plugin": "^2.0.0",
