@@ -1,3 +1,3 @@
 [functions]
   directory = "functions"
-  included_files = ["template/**"]
+  included_files = ["user-site/**"]
