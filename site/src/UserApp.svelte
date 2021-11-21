@@ -3,13 +3,10 @@
   import { ethers } from 'ethers'
 
   import './global.css'
-  import ThemeSwitcher from './components/ThemeSwitcher.svelte'
+  import '../public/system.css'
   import UserCard from './components/UserCard.svelte'
-  import { theme } from './stores/theme'
 
   export let subdomain = ''
-
-  let menuActive = false
   const [username, ...domain] = subdomain.split('.')
 
   async function loadProfile () {
@@ -56,9 +53,6 @@
 </script>
 
 <svelte:head>
-  <meta name="color-scheme" content={$theme == 'system' ? 'light dark' : $theme} />
-  <link rel="stylesheet" href="/{$theme}.css" />
-
   <title>{username}'s site on {domain.join('.')}</title>
 </svelte:head>
 
@@ -70,22 +64,9 @@
   {/if}
 </main>
 
-<div id="theme-button">
-  <ThemeSwitcher />
-</div>
-
 <style>
   main {
     padding: 0;
-  }
-
-  #theme-button {
-    position: absolute;
-    bottom: 1em;
-    right: 1em;
-    display: block;
-    height: 3em;
-    width: 3em;
   }
 
   @media (min-width:801px) { /* tablet, landscape iPad, lo-res laptops ands desktops */
