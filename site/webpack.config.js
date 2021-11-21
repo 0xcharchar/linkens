@@ -3,6 +3,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin');
 const Dotenv = require('dotenv-webpack')
+const CopyPlugin = require('copy-webpack-plugin')
 
 const path = require('path')
 const webpack = require('webpack')
@@ -66,6 +67,13 @@ module.exports = env => {
     },
     mode,
     plugins: [
+      new CopyPlugin({
+        patterns: [
+          path.resolve(__dirname, 'public', 'system.css'),
+          path.resolve(__dirname, 'public', 'light.css'),
+          path.resolve(__dirname, 'public', 'dark.css')
+        ]
+      }),
       new HtmlWebpackPlugin({
         template: 'public/index.html',
         scriptLoading: 'defer'

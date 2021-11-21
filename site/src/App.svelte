@@ -10,7 +10,7 @@
 
 <svelte:head>
   <meta name="color-scheme" content={$theme == 'system' ? 'light dark' : $theme} />
-  <link rel="stylesheet" href="/{$theme}.css" />
+  <link rel="stylesheet" href="{$theme}.css" />
 </svelte:head>
 
 <div id="warning">
