@@ -31,7 +31,7 @@ Content:
 5. Fill in environment value with template and your data
     ```sh
     # The URL of the backend netlify function
-    DEPLOY_IPFS_ROUTE=
+    DEPLOY_IPFS_ROUTE=http://localhost:7000/.netlify/functions/ipfs-deploy
     
     # Dependent on the ethereum network
     RESOLVER_ADDRESS=
@@ -44,6 +44,14 @@ Content:
     
     # The address when deployed
     SITE_MANAGER_ADDRESS=
+
+    # Third party API keys
+    WALLET_CONNECT_API=
+    INFURA_PROJECT_ID=
+    INFURA_PROJECT_SECRET=
+    ALCHEMY_API_RPC_URL=
+    ALCHEMY_API_KEY=
+    ETHEREUM_NETWORK_KEY=ropsten
     ```
 
 ## Deploy

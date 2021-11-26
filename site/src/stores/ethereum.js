@@ -7,7 +7,7 @@ export const address = writable('')
 export const ens = writable({ name: '', avatar: '' })
 export const connected = writable(false)
 
-const rpcUrl = process.env.ALCHEMY_API_RPC_URL
+const rpcUrl = `${process.env.ALCHEMY_API_RPC_URL}${process.env.ALCHEMY_API_KEY}`
 const onboard = Onboard({
   dappId: process.env.BLOCKNATIVE_API_KEY,
   networkId: 3,
