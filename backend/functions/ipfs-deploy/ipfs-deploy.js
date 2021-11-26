@@ -30,8 +30,9 @@ const toFile = (name, finishCb) => {
   const writer = new Writable()
 
   const chunks = []
-  writer._write = chunk => {
+  writer._write = (chunk, enc, next) => {
     chunks.push(chunk)
+    next()
   }
 
   writer.on('finish', () => {
@@ -68,7 +69,6 @@ const handler = async (event) => {
       .pipe(replacestream('{{USER_SUBDOMAIN}}', sanitizedSubdomain))
       .pipe(writer)
 
-    reader.destroy()
     await finishedAsync(writer)
 
     return patchedFile
@@ -77,7 +77,9 @@ const handler = async (event) => {
   try {
     const ipfsClient = new Web3Storage({ token: process.env.WEB3_STORAGE_API_KEY })
 
-    const cid = await ipfsClient.put(await Promise.all(files), {
+    const siteFiles = await Promise.all(files)
+
+    const cid = await ipfsClient.put(siteFiles, {
       name: sanitizedSubdomain,
       maxRetries: 2,
       wrapWithDirectory: false
