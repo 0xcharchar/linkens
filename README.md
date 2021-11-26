@@ -66,5 +66,7 @@ A domain needs to be registered with ENS to use this application.
 Visit https://app.ens.domains and register a node on either mainnet or a
 testnet.
 
+Netlify CLI needs to be setup, logged in to, and linked with this repo.
+
 
 _This project was originally built as part of the [ETHOnline 2021 Hackathon](https://showcase.ethglobal.com/ethonline2021/linkens)._

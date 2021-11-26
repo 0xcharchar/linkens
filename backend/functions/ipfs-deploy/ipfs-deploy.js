@@ -1,12 +1,16 @@
 'use strict'
 
 const path = require('path')
+const { promisify } = require('util')
+const { finished, Writable } = require('stream')
+
 const { getFilesFromPath, File, Web3Storage } = require('web3.storage')
+const uts46 = require('idna-uts46-hx')
+const replacestream = require('replacestream')
 
-// load files from user-site
-// search bundle.[hash].js for {{USER_SUBDOMAIN}}
-// replace {{USER_SUBDOMAIN}} with provided subdomain
+const pipe = (...fns) => x => fns.reduce((v, fn) => fn(v), x)
 
+const finishedAsync = promisify(finished)
 
 const cors = {
   headers: {
@@ -18,14 +22,24 @@ const cors = {
   body: 'preflight'
 }
 
-const streamString = async (stream) => {
-  const chunks = []
+const asciiEns = username => uts46.toAscii(username, { transitional: false, useStd3ASCII: true })
+const onlyAlphanumeric = username => username.replace(/[^a-z0-9]/ig, '')
+const formatLabel = pipe(onlyAlphanumeric, asciiEns)
 
-  for await (const chunk of stream) {
-    chunks.push(Buffer.from(chunk))
+const toFile = (name, finishCb) => {
+  const writer = new Writable()
+
+  const chunks = []
+  writer._write = chunk => {
+    chunks.push(chunk)
   }
 
-  return Buffer.concat(chunks).toString('utf-8')
+  writer.on('finish', () => {
+    const f = new File(chunks, name)
+    finishCb(f)
+  })
+
+  return writer
 }
 
 const handler = async (event) => {
@@ -36,25 +50,39 @@ const handler = async (event) => {
   if (httpMethod !== 'POST') return { statusCode: 404, body: 'Route not found' }
 
   const { subdomain } = JSON.parse(isBase64Encoded ? Buffer.from(body, 'base64').toString() : body)
-  // TODO subdomain should be normalized to remove possible attack vectors
+  const sanitizedSubdomain = `${formatLabel(subdomain.split('.')[0])}.ethonline2021char.eth`
 
   const files = (await getFilesFromPath(path.join(process.cwd(), 'user-site'))).map(async (file) => {
-    if (!file.name.startsWith('/user-site/bundle.') && !file.name.endsWith('.js')) return file
+    // Only care about the bundle.js file, everything else remains unchanged
+    if (!file.name.match(/\/user-site\/bundle\.[a-z0-9]*\.[0-9]{1,3}\.js/g)) return file
 
-    const contents = await streamString(file.stream())
-    const patched = contents.replace('{{USER_SUBDOMAIN}}', subdomain)
+    const reader = file.stream()
+    let patchedFile
+    const writer = toFile(file.name, (patched) => {
+      patchedFile = patched
+    })
 
-    return new File(patched, file.name, { type: file.type })
+    reader.on('close', () => writer.end())
+
+    reader
+      .pipe(replacestream('{{USER_SUBDOMAIN}}', sanitizedSubdomain))
+      .pipe(writer)
+
+    reader.destroy()
+    await finishedAsync(writer)
+
+    return patchedFile
   })
 
   try {
     const ipfsClient = new Web3Storage({ token: process.env.WEB3_STORAGE_API_KEY })
+
     const cid = await ipfsClient.put(await Promise.all(files), {
-      name: subdomain,
+      name: sanitizedSubdomain,
       maxRetries: 2,
       wrapWithDirectory: false
     })
-    console.log(`Saved ${subdomain} as ${cid}`)
+    console.log(`Saved ${sanitizedSubdomain} as ${cid}`)
 
     return {
       statusCode: 200,
