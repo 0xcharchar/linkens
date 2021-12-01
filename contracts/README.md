@@ -60,6 +60,8 @@ subnode to the sender.
 
 #### `subdomainRegister`
 
+_Current gas usage: 88247-880992_
+
 Signature:
 
 ```solidity
@@ -110,6 +112,65 @@ async function createSubdomain (label) {
 
 createSubdomain('mysub')
 ```
+
+## SiteManagerLite
+
+SiteManagerLite is a limited version of SiteManager. It:
+
+* registers a subdomain
+* sets a contenthash
+* transfers ownership from the SiteManagerLite contract to the requestor
+
+### Usage
+
+#### subdomainRegister
+
+_Current gas usage: 167647_
+
+Signature:
+
+```solidity
+function subdomainRegister (bytes32 label, bytes32 fullAddress, bytes calldata hash) external;
+```
+
+To use this function from Javascript (in a browser), here is a brief example using [ethers](https://docs.ethers.io/v5/).
+
+```js
+import { ethers } from 'ethers'
+import { Resolver } from '@ensdomains/ens-contracts'
+
+const RESOLVER_ADDRESS = ''
+const SITE_MANAGER_ADDRESS = ''
+
+const rootNodeName = 'somedemo.eth'
+const labelHash = label => ethers.utils.namehash(`${ethers.utils.id(label)}.${rootNodeName}`)
+
+const provider = new ethers.providers.Web3Provider(window.ethereum)
+
+async function createSubdomain (label) {
+  // Get signer from metamask
+  await provider.send("eth_requestAccounts", [])
+  const signer = provider.getSigner()
+
+  // Create contract insances
+  const resolver = new ethers.Contract(RESOLVER_ADDRESS, Resolver, signer)
+  const siteManagerAbi = [
+    'function subdomainRegister(bytes32 label, bytes[] calldata data) external returns (bytes[] memory)'
+  ]
+  const siteManager = new ethers.Contract(SITE_MANAGER_ADDRESS, siteManagerAbi, signer)
+
+  // Register a subdomain
+  const encodedFunctions = [
+    resolver.interface.encodeFunctionData('setText', [labelHash(label), 'com.github', '0xcharchar']),
+  ]
+  const regTx = await siteManager.subdomainRegister(ethers.utils.id(label), encodedFunctions, { gasLimit: 500000 })
+  const txResult = await regTx.wait()
+  console.log('Registration result', txResult)
+}
+
+createSubdomain('mysub')
+```
+
 
 ## Testing
 
