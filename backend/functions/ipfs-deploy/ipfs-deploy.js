@@ -79,7 +79,7 @@ const parseBody = (body, isEncoded) => {
 }
 
 const templateSelector = {
-  '1.0': 'user-site',
+  '1.0': 'onchain',
   '2.0': 'allinone'
 }
 

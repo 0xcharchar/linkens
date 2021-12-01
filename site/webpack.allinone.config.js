@@ -12,7 +12,7 @@ const prod = mode === 'production'
 module.exports = env => {
   return {
     entry: {
-      bundle: ['./src/user.js']
+      bundle: ['./src/user.allinone.js']
     },
     devServer: {
       historyApiFallback: true
@@ -25,7 +25,7 @@ module.exports = env => {
       mainFields: ['svelte', 'browser', 'module', 'main']
     },
     output: {
-      path: path.join(__dirname, 'build', 'user', 'onchain'),
+      path: path.join(__dirname, 'build', 'user', 'allinone'),
       filename: '[name].[contentHash].js',
       chunkFilename: '[name].[contentHash].[id].js'
     },

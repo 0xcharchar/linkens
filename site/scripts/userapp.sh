@@ -8,11 +8,16 @@ cd $(dirname $script_dir)
 
 # Remove old user files
 npm run clean:user
-rm -rf ../backend/templates/user-site/*
+rm -rf ../backend/templates/*
 
 # Build user site
-USER_SUBDOMAIN="{{USER_SUBDOMAIN}}" npm run build:user
+export USER_SUBDOMAIN="{{USER_SUBDOMAIN}}"
+export USER_AVATAR="{{USER_AVATAR}}"
+export USER_LINKS="{{USER_LINKS}}"
+
+npm run build:user-onchain
+npm run build:user-allinone
 
 # Copy latest build to backend
-cp build/user/* ../backend/templates/user-site/
+cp -r build/user/* ../backend/templates/
 )
