@@ -8,11 +8,11 @@ cd $(dirname $script_dir)
 
 # Remove old user files
 npm run clean:user
-rm -rf ../backend/user-site/*
+rm -rf ../backend/templates/user-site/*
 
 # Build user site
 USER_SUBDOMAIN="{{USER_SUBDOMAIN}}" npm run build:user
 
 # Copy latest build to backend
-cp build/user/* ../backend/user-site/
+cp build/user/* ../backend/templates/user-site/
 )

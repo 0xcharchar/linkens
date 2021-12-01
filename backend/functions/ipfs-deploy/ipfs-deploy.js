@@ -43,17 +43,10 @@ const toFile = (name, finishCb) => {
   return writer
 }
 
-const handler = async (event) => {
-  const { httpMethod, body, isBase64Encoded } = event
+const prepareSite = async (template, replacements) => {
+  const files = await getFilesFromPath(path.join(process.cwd(), 'templates', template))
 
-  if (httpMethod === 'OPTIONS') return cors
-
-  if (httpMethod !== 'POST') return { statusCode: 404, body: 'Route not found' }
-
-  const { subdomain } = JSON.parse(isBase64Encoded ? Buffer.from(body, 'base64').toString() : body)
-  const sanitizedSubdomain = `${formatLabel(subdomain.split('.')[0])}.ethonline2021char.eth`
-
-  const files = (await getFilesFromPath(path.join(process.cwd(), 'user-site'))).map(async (file) => {
+  return files.map(async (file) => {
     // Only care about the bundle.js file, everything else remains unchanged
     if (!file.name.match(/\/user-site\/bundle\.[a-z0-9]*\.[0-9]{1,3}\.js/g)) return file
 
@@ -66,20 +59,44 @@ const handler = async (event) => {
     reader.on('close', () => writer.end())
 
     reader
-      .pipe(replacestream('{{USER_SUBDOMAIN}}', sanitizedSubdomain))
+      .pipe(replacestream('{{USER_SUBDOMAIN}}', replacements['{{USER_SUBDOMAIN}}']))
       .pipe(writer)
 
     await finishedAsync(writer)
 
     return patchedFile
   })
+}
+
+const parseBody = (body, isEncoded) => {
+  const bodyJson = JSON.parse(isBase64Encoded ? Buffer.from(body, 'base64').toString() : body)
+
+  if (!bodyJson.version) {
+    const sanitizedSubdomain = `${formatLabel(bodyJson.subdomain.split('.')[0])}.ethonline2021char.eth`
+    return { subdomain: sanitizedSubdomain, version: '1.0' }
+  }
+
+}
+
+const templateSelector = {
+  '1.0': 'user-site',
+  '2.0': 'allinone'
+}
+
+const handler = async (event) => {
+  const { httpMethod, body, isBase64Encoded } = event
+
+  if (httpMethod === 'OPTIONS') return cors
+
+  if (httpMethod !== 'POST') return { statusCode: 404, body: 'Route not found' }
 
   try {
+    const { subdomain, version } = parseBody(body, isBase64Encoded)
+    const files = await Promise.all(await prepareSite(templateSelector[version], { '{{USER_SUBDOMAIN}}': subdomain }))
+
     const ipfsClient = new Web3Storage({ token: process.env.WEB3_STORAGE_API_KEY })
 
-    const siteFiles = await Promise.all(files)
-
-    const cid = await ipfsClient.put(siteFiles, {
+    const cid = await ipfsClient.put(files, {
       name: sanitizedSubdomain,
       maxRetries: 2,
       wrapWithDirectory: false
