@@ -1,8 +1,8 @@
 import App from './UserApp.svelte';
 
 const username = process.env.USER_SUBDOMAIN.split('.')[0]
-// TODO map these into proper links??
-const links = JSON.parse(process.env.USER_LINKS)
+// TODO map these into proper links
+const links = JSON.parse(decodeURIComponent(process.env.USER_LINKS))
 const avatar = process.env.USER_AVATAR
 
 const app = new App({

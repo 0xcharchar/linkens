@@ -42,17 +42,55 @@
     RESOLVER_ADDRESS: process.env.RESOLVER_ADDRESS,
     DEPLOY_IPFS_ROUTE: process.env.DEPLOY_IPFS_ROUTE,
     SITE_MANAGER_ADDRESS: process.env.SITE_MANAGER_ADDRESS,
-    MINIMUM_GAS: 280000,
+    MINIMUM_GAS: 160000,
   }
-
 
   const subdomain = label => `${label}.${env.ENS_NODE}`
   const hasher = node => ethers.utils.namehash(node)
 
-  async function deployPage (label) {
+  function linkFormat (link) {
+    let key = ''
+    if (link.description.toLowerCase().includes('twitter')) key = 'com.twitter'
+    else if (link.description.toLowerCase().includes('instagram')) key = 'com.instagram'
+    else if (link.description.toLowerCase().includes('facebook')) key = 'com.facebook'
+    else return null
+
+    let handle = link.value
+    try {
+      const socialUrl = new URL(link.value)
+      handle = socialUrl.pathname.split('/')[1]
+    } catch (err) {
+      // Probably failed because user supplied handle and not URL
+      // Shrug shoulders, move on
+      console.log('Error parsing link', { err, value: link.value })
+    }
+
+    return { description: key, value: handle }
+  }
+
+  function toResolverTextFn (node) {
+    return function (link) {
+      return ['setText', [node, link.description, link.value]]
+    }
+  }
+
+  async function deployPage (profile) {
+    const {
+      username: label,
+      links,
+      avatar
+    } = profile
+
+    const formattedLinks = links.map(linkFormat).filter(link => link != null)
+
     const response  = await fetch(env.DEPLOY_IPFS_ROUTE, {
       method: 'POST',
-      body: JSON.stringify({ subdomain: subdomain(label) })
+      body: JSON.stringify({
+        version: '2.0',
+        subdomain: subdomain(label),
+        links: formattedLinks,
+        avatar
+      })
     })
 
     const { hash } = await response.json()
@@ -64,14 +102,9 @@
     if (!signer) {
       console.log('No signer?!')
       throw new Error('Missing signer')
-
-      /*
-      await provider.send("eth_requestAccounts", [])
-      signer = provider.getSigner()
-      */
     }
 
-    const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, $provider)
+    const ensRegistry = new ethers.Contract(env.ENS_REGISTRY_ADDRESS, ENSRegistryWithFallback, signer)
 
     console.log('ipfshash', ipfsHash)
     console.log('hashed', contentHash.fromIpfs(ipfsHash))
@@ -80,36 +113,12 @@
     const resolverAddr = await ensRegistry.resolver(node)
     const resolver = new ethers.Contract(resolverAddr, Resolver, signer)
 
-    function linkSet (link) {
-      let key = ''
-      if (link.description.toLowerCase().includes('twitter')) key = 'com.twitter'
-      else if (link.description.toLowerCase().includes('instagram')) key = 'com.instagram'
-      else if (link.description.toLowerCase().includes('facebook')) key = 'com.facebook'
-      else return null
-
-      let handle = link.value
-      try {
-        const socialUrl = new URL(link.value)
-        handle = socialUrl.split('/')[0]
-      } catch (err) {
-        // Probably failed because user supplied handle and not URL
-        // Shrug shoulders, move on
-      }
-
-      return ['setText', [node, key, handle]]
-    }
-
     const resolverFunctions = [
       ['setContenthash', [node, `0x${contentHash.fromIpfs(ipfsHash)}`]],
-      $profile.avatarCid ? ['setText', [node, 'avatar', $profile.avatarCid]] : null,
-      ...$profile.links.map(linkSet)
-    ].filter(fn => fn !== null)
+    ]
 
     const encodedFunctions = resolverFunctions
       .map(([fn, args]) => resolver.interface.encodeFunctionData(fn, args))
-
-    console.log('multicalldata', encodedFunctions)
-    console.log('label', label, ethers.utils.id(label))
 
     const gasEstimate = (await Promise.all(
       resolverFunctions.map(([fn, args]) => resolver.estimateGas[fn](...args))
@@ -134,7 +143,7 @@
   let pageLink = ''
 
   function createPage (profileData) {
-    return deployPage(profileData.username)
+    return deployPage(profileData)
       .then(saveProfile)
       .then(ipfsHash => {
         pageLink = toGatewayUrl(ipfsHash)
