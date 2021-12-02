@@ -8,6 +8,7 @@
   import Card from '../components/Card.svelte'
   import FormControls from '../components/FormControls.svelte'
   import FormTitle from '../components/FormTitle.svelte'
+  import ValidStateIcon from '../components/ValidStateIcon.svelte'
 
   import { profile } from '../stores/profile'
   import { connected, connectWallet, provider } from '../stores/ethereum'
@@ -16,8 +17,11 @@
   // Jump back to first page if key data missing
   if (!$profile.username) replace('/')
 
+  let isPublishing = false
+
   async function publishBtn (ev) {
     console.log('in confirmation step action')
+    isPublishing = true
     if (!$connected) {
       console.log('need to connect wallet')
       await connectWallet()
@@ -140,16 +144,14 @@
     return ipfsHash
   }
 
-  let pageLink = ''
-
   function createPage (profileData) {
     return deployPage(profileData)
       .then(saveProfile)
       .then(ipfsHash => {
-        pageLink = toGatewayUrl(ipfsHash)
+        return toGatewayUrl(ipfsHash)
       })
-      .then(() => {
-        push('/user')
+      .then((pageLink) => {
+        push(`/user/${encodeURIComponent(pageLink)}`)
       })
       .catch(err => {
         console.log('error saving page', err)
@@ -183,10 +185,14 @@
     </Card>
   </section>
 
-  <FormControls
-    mainBtnText={$connected ? 'Publish' : 'Connect'}
-    on:primaryClick={publishBtn}
-    on:secondaryClick={backBtn} />
+  {#if isPublishing}
+    <p>Site is publishing <ValidStateIcon status=1 /></p>
+  {:else}
+    <FormControls
+      mainBtnText={$connected ? 'Publish' : 'Connect'}
+      on:primaryClick={publishBtn}
+      on:secondaryClick={backBtn} />
+  {/if}
 </main>
 
 <style>

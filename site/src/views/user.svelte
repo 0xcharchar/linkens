@@ -1,10 +1,13 @@
 <script>
   import UserCard from '../components/UserCard.svelte'
   import { profile } from '../stores/profile'
+
+  export let params = {}
 </script>
 
 <main>
   <UserCard profile={$profile} />
+  <p>Visit your IPFS site at <a target="_blank" href={decodeURIComponent(params.siteUrl)}>{decodeURIComponent(params.siteUrl)}</a></p>
 </main>
 
 <style>
