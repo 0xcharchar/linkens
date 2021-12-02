@@ -2,7 +2,7 @@
 
 const path = require('path')
 const { promisify } = require('util')
-const { finished, Writable } = require('stream')
+const { finished, pipeline, Writable } = require('stream')
 
 const { getFilesFromPath, File, Web3Storage } = require('web3.storage')
 const uts46 = require('idna-uts46-hx')
@@ -11,6 +11,7 @@ const replacestream = require('replacestream')
 const pipe = (...fns) => x => fns.reduce((v, fn) => fn(v), x)
 
 const finishedAsync = promisify(finished)
+const pipelineAsync = promisify(pipeline)
 
 const cors = {
   headers: {
@@ -48,7 +49,7 @@ const prepareSite = async (template, replacements) => {
 
   return files.map(async (file) => {
     // Only care about the bundle.js file, everything else remains unchanged
-    if (!file.name.match(/\/user-site\/bundle\.[a-z0-9]*\.[0-9]{1,3}\.js/g)) return file
+    if (!file.name.match(/bundle\.[a-z0-9]*\.[0-9]{1,3}\.js/g)) return file
 
     const reader = file.stream()
     let patchedFile
@@ -58,9 +59,15 @@ const prepareSite = async (template, replacements) => {
 
     reader.on('close', () => writer.end())
 
-    reader
-      .pipe(replacestream('{{USER_SUBDOMAIN}}', replacements['{{USER_SUBDOMAIN}}']))
-      .pipe(writer)
+    const replacers = Object.entries(replacements).map(([k, v]) => {
+      return replacestream(k, v)
+    })
+
+    await pipelineAsync(
+      reader,
+      ...replacers,
+      writer
+    )
 
     await finishedAsync(writer)
 
@@ -69,13 +76,23 @@ const prepareSite = async (template, replacements) => {
 }
 
 const parseBody = (body, isEncoded) => {
-  const bodyJson = JSON.parse(isBase64Encoded ? Buffer.from(body, 'base64').toString() : body)
+  const bodyJson = JSON.parse(isEncoded ? Buffer.from(body, 'base64').toString() : body)
 
-  if (!bodyJson.version) {
+  if (!bodyJson.version || bodyJson.version === '1.0') {
     const sanitizedSubdomain = `${formatLabel(bodyJson.subdomain.split('.')[0])}.ethonline2021char.eth`
     return { subdomain: sanitizedSubdomain, version: '1.0' }
   }
 
+  if (bodyJson.version === '2.0') {
+    const { subdomain, links, avatar } = bodyJson
+
+    return {
+      version: '2.0',
+      subdomain: `${formatLabel(subdomain.split('.')[0])}.ethonline2021char.eth`,
+      links: encodeURIComponent(JSON.stringify(links)),
+      avatar
+    }
+  }
 }
 
 const templateSelector = {
@@ -91,17 +108,25 @@ const handler = async (event) => {
   if (httpMethod !== 'POST') return { statusCode: 404, body: 'Route not found' }
 
   try {
-    const { subdomain, version } = parseBody(body, isBase64Encoded)
-    const files = await Promise.all(await prepareSite(templateSelector[version], { '{{USER_SUBDOMAIN}}': subdomain }))
+    const { subdomain, links, avatar, version } = parseBody(body, isBase64Encoded)
+    console.log('parsed', { links, avatar, subdomain, version })
+    const files = await Promise.all(await prepareSite(
+      templateSelector[version],
+      {
+        '{{USER_SUBDOMAIN}}': subdomain,
+        '{{USER_LINKS}}': links,
+        '{{USER_AVATAR}}': avatar,
+      }
+    ))
 
     const ipfsClient = new Web3Storage({ token: process.env.WEB3_STORAGE_API_KEY })
 
     const cid = await ipfsClient.put(files, {
-      name: sanitizedSubdomain,
+      name: subdomain,
       maxRetries: 2,
       wrapWithDirectory: false
     })
-    console.log(`Saved ${sanitizedSubdomain} as ${cid}`)
+    console.log(`Saved ${subdomain} as ${cid}`)
 
     return {
       statusCode: 200,
