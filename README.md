@@ -1,3 +1,7 @@
+This code will remain as is. We are moving to a separate organization to better manage the code base.
+
+---
+
 # LinkENS
 
 Create your Web3 profile and own every part of it.
